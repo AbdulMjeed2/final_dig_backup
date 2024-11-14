@@ -103,6 +103,13 @@ const ExamIdPage = ({
       ...prevSelections,
       [questionId]: optionPosition,
     }));
+
+    const isCorrectAnswer = (question: { options: { id: string; questionId: string; text: string; position: number; }[]; } & { id: string; examId: string; prompt: string; position: number; answer: string; isPublished: boolean; explanation: string | null; createdAt: Date; updatedAt: Date; }, optionPosition: number) => {
+      return parseInt(question.answer) === optionPosition;
+    };
+    
+    // Within your render method
+    
   };
   const handleRepeat = () => {
     setUserSelections({});
@@ -110,15 +117,20 @@ const ExamIdPage = ({
     setFailedInExam(false);
     setCanSubmit(false);
   };
+  const isPreTestRetakeAllowed = exam?.starterExam && !hasSubmitted && !hasTakenTheExamBefore;
   const handleSubmit = useCallback(async () => {
     if (!exam || !hasUserSelections || hasSubmitted) return;
+
+    // Prevent submitting if the exam is a starter exam and the user has already taken it
+    if (exam.starterExam && hasTakenTheExamBefore && !setFailedInExam) {
+      toast.error("لا يمكنك إعادة الاختبار القبلي.");
+      return;
+    }
 
     setIsSubmitting(true);
 
     try {
-      const fieldToUpdate = hasTakenTheExamBefore
-        ? "afterScore"
-        : "beforeScore";
+      const fieldToUpdate = hasTakenTheExamBefore ? "afterScore" : "beforeScore";
 
       sethasSubmitted(true);
 
@@ -126,6 +138,7 @@ const ExamIdPage = ({
         toast.success("يمكنك الان البدء في الدورة التدريبية");
       }
 
+      // Update progress in the backend
       const response = await axios.patch(
         `/api/courses/${params.courseId}/exam/${params.examId}/progress`,
         {
@@ -134,22 +147,24 @@ const ExamIdPage = ({
           userSelections,
         }
       );
+
       if (!isFirstExam) {
+        // If score is less than 50, allow the user to retake the test
         if (scorePercentage < 50) {
           setFailedInExam(true);
           toast.error(
-            `لقد احرزت علامة ${scorePercentage.toFixed(
-              1
-            )} يمكنك اعادة الاختبار بعد مراجعة الدورة التدريبية مرة أخرى`
+            `لقد احرزت علامة ${scorePercentage.toFixed(1)}. يمكنك إعادة الاختبار بعد مراجعة الدورة التدريبية مرة أخرى.`
           );
         } else {
+          // If the score is 50 or more, issue the certificate
           toast.success(
-            `احسنت لقد احرزت علامة ${scorePercentage.toFixed(1)}  `
+            `احسنت! لقد أحرزت علامة ${scorePercentage.toFixed(1)}.`
           );
+
+          // Request to generate the certificate
           const certificateResponse = await axios.post(
             `/api/courses/${params.courseId}/exam/${params.examId}/certificate`
           );
-          router.refresh();
 
           if (certificateResponse.status === 200) {
             toast.success("شهادتك جاهزة!");
@@ -160,13 +175,11 @@ const ExamIdPage = ({
           }
         }
       }
+
+      // Refresh the page if it's the first exam
       if (response) {
         if (isFirstExam) {
           router.refresh();
-          // setTimeout(() => {
-          //   return router.push(`/courses/${course?.id}`)
-
-          // }, 1500);
         }
       }
 
@@ -190,7 +203,11 @@ const ExamIdPage = ({
     params.courseId,
     scorePercentage,
     userId,
+    userSelections,
+    isFirstExam,
+    router
   ]);
+
 
   // Get the exam data and update the time remaining
   useEffect(() => {
@@ -264,6 +281,7 @@ const ExamIdPage = ({
     // Enable submission when all questions are answered
   }, [exam?.questions, userSelections, hasSubmitted]);
 
+  
   useEffect(() => {
     if (answeredQuestions === exam?.questions.length) {
       setCanSubmit(true);
@@ -337,8 +355,8 @@ const ExamIdPage = ({
               </div>
               <div className="flex flex-col space-y-4 ">
                 <p>مجموع الاسئلة: {exam?.questions.length}</p>
-                <p>عدد الأسئلة الصحيحة: {correctAnswers}</p>
-                <p>عدد الأسئلة الخاطئة: {wrongAnswers}</p>
+                <p>عدد الآسئلة الصحيحة: {correctAnswers}</p>
+                <p>عدد الآسئلة الخاطئة: {wrongAnswers}</p>
                 <p>النسبة المئوية: % {scorePercentage.toFixed(1)} </p>
               </div>
               <button
@@ -366,7 +384,7 @@ const ExamIdPage = ({
                 <p>مجموع الاسئلة: {exam?.questions.length}</p>
                 <p>عدد الأسئلة الصحيحة: {correctAnswers}</p>
                 <p>عدد الأسئلة الخاطئة: {wrongAnswers}</p>
-                <p>النسبة المئوية: {scorePercentage.toFixed(1)}</p>
+                <p> النسبة المئوية: %{scorePercentage.toFixed(1)}</p>
               </div>
               <div>
                 <PrepareCertificateModal
@@ -399,7 +417,7 @@ const ExamIdPage = ({
                 <p>مجموع الاسئلة: {exam?.questions.length}</p>
                 <p>عدد الأسئلة الصحيحة: {correctAnswers}</p>
                 <p>عدد الأسئلة الخاطئة: {wrongAnswers}</p>
-                <p>النسبة المئوية: {scorePercentage.toFixed(1)}</p>
+                <p>النسبة المئوية:% {scorePercentage.toFixed(1)}</p>
               </div>
               <button
                 type="button"
@@ -609,3 +627,4 @@ const ExamIdPage = ({
 };
 
 export default ExamIdPage;
+
