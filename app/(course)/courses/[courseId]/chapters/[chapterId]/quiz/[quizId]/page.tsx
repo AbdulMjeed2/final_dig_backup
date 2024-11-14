@@ -22,7 +22,7 @@ import { useConfettiStore } from "@/hooks/use-confetti-store";
 import { Banner } from "@/components/banner";
 import Link from "next/link";
 import FroalaEditorView from "react-froala-wysiwyg/FroalaEditorView";
-import { Check } from "lucide-react";
+import { Check, X } from "lucide-react";
 
 type QuizWithQuestionsAndOptions = Prisma.QuizGetPayload<{
   include: {
@@ -93,12 +93,18 @@ const ExamIdPage = ({
     get();
   }, []);
   const handleOptionChange = (questionId: string, optionPosition: number) => {
-    sethasSubmitted(false);
+    sethasSubmitted(false); // Ensures hasSubmitted is reset only when options change
     setUserSelections((prevSelections) => ({
       ...prevSelections,
       [questionId]: optionPosition,
     }));
   };
+  const isOptionSelected = (questionId: string, optionPosition: number) => {
+    return userSelections[questionId] === optionPosition;
+  };
+
+  
+  
 
   const handleSubmit = useCallback(async () => {
     if (!quiz || !hasUserSelections) return;
@@ -113,8 +119,8 @@ const ExamIdPage = ({
           userId: userId,
         }
       );
-
-      if (points != undefined) {
+    
+      if (points !== undefined) {  // Check to ensure points is defined
         const quizResponse = await axios.put(
           `/api/courses/${params.courseId}/chapters/${params.chapterId}/quiz/${quiz.id}/progress`,
           {
@@ -122,29 +128,34 @@ const ExamIdPage = ({
             userSelections,
           }
         );
-
-        sethasSubmitted(true);
+    
+        sethasSubmitted(true); // Set hasSubmitted to true only after successful submission
+    
         if (points > 50) {
           toast.success(`احسنت لقد حصلت على ${points.toFixed(1)}`, {
             duration: 4000,
           });
         } else {
-          toast.success(` لقد حصلت على ${points.toFixed(1)}`, {
+          toast.success(`لقد حصلت على ${points.toFixed(1)}`, {
             duration: 4000,
           });
         }
       } else {
-        toast.success(`لقد حصلت على ${points}`, {
-          duration: 4000,
-        });
+        if (points !== undefined) {  // Ensure points has a value before showing the toast
+          toast.success(`لقد حصلت على ${points}`, {
+            duration: 4000,
+          });
+        }
+        
       }
-
+    
       router.refresh();
     } catch (error) {
       toast.error("هناك خطأ ما");
     } finally {
       setIsSubmitting(false);
     }
+    
   }, [
     confetti,
     hasUserSelections,
@@ -155,7 +166,7 @@ const ExamIdPage = ({
     router,
     userId,
   ]);
-
+  
   // Fetch the quiz data and update the time remaining
   useEffect(() => {
     if (quiz) {
@@ -265,90 +276,88 @@ const ExamIdPage = ({
           )}
 
           <div className="flex flex-col px-10 mt-10  items-center relative">
-            {quiz?.questions.map((question, index) => (
-              <CarouselItem key={index} className="w-full mb-4">
-                <div className="bg-sky-100 border border-slate-200 rounded-lg p-4 max-w-full ">
-                  <div className="w-full flex h-fit flex-col items-end">
-                    <div className="font-medium text-slate-500 mb-4 text-right">
-                      سؤال {index + 1}
-                    </div>
+          {quiz?.questions.map((question, index) => (
+  <CarouselItem key={index} className="w-full mb-4">
+    <div className="bg-sky-100 border border-slate-200 rounded-lg p-4 max-w-full">
+      <div className="w-full flex h-fit flex-col items-end">
+        <div className="font-medium text-slate-500 mb-4 text-right">
+          سؤال {index + 1}
+        </div>
 
-                    <div
-                      className="text-slate-700 font-bold text-lg mb-2"
-                      dir="rtl"
-                    >
-                      <FroalaEditorView model={question.prompt} />
-                    </div>
+        <div className="text-slate-700 font-bold text-lg mb-2" dir="rtl">
+          <FroalaEditorView model={question.prompt} />
+        </div>
 
-                    <div className="flex flex-col items-end space-y-2 w-full mb-4 ">
-                      {question.options.map((option, index) => (
-                        <div key={option.id}>
-                          {hasSubmitted ? (
-                            <div
-                              className={`flex space-x-2 flex-row-reverse justify-between ${
-                                index + 1 == parseInt(question.answer) &&
-                                "bg-[#0177a9] min-w-[500px] rounded-md"
-                              }`}
-                            >
-                              <div className="flex gap-2">
-                                <label className="capitalize text-sm">
-                                  {option.text}
-                                </label>
-                                <input
-                                  className="mr-2"
-                                  type="radio"
-                                  name={question.id}
-                                  disabled={disableSelect}
-                                  onChange={() =>
-                                    handleOptionChange(question.id, index)
-                                  }
-                                />
-                              </div>
-                              {index + 1 == parseInt(question.answer) && (
-                                <Check className="text-green-200" />
-                              )}
-                            </div>
-                          ) : (
-                            <div className="flex space-x-2">
-                              <label className="block capitalize text-sm">
-                                {option.text}
-                              </label>
-
-                              <input
-                                className="mr-2"
-                                type="radio"
-                                disabled={disableSelect}
-                                name={question.id}
-                                value={index + 1}
-                                checked={userSelections[question.id] == index}
-                                onChange={() =>
-                                  handleOptionChange(question.id, index)
-                                }
-                              />
-                            </div>
-                          )}
+        <div className="flex flex-col items-end space-y-2 w-full mb-4">
+                {question.options.map((option, optionIndex) => (
+                  <div key={option.id}>
+                    {hasSubmitted ? (
+                      <div
+                        className={`flex space-x-2 flex-row-reverse justify-between ${
+                          optionIndex + 1 === parseInt(question.answer)
+                            ? "bg-green-200 min-w-[500px] rounded-md" // Green background for correct answer
+                            : wrongAnswersQuiz.includes(question.id) &&
+                              isOptionSelected(question.id, optionIndex)
+                            ? "bg-red-100 min-w-[500px] rounded-md" // Red background for wrong answer
+                            : ""
+                        }`}
+                      >
+                        <div className="flex gap-2">
+                          <label className="capitalize text-sm">{option.text}</label>
+                          <input
+                            className="mr-2"
+                            type="radio"
+                            name={question.id}
+                            disabled={disableSelect}
+                            checked={isOptionSelected(question.id, optionIndex)}
+                            onChange={() => handleOptionChange(question.id, optionIndex)}
+                          />
                         </div>
-                      ))}
-                      {hasSubmitted &&
-                        wrongAnswersQuiz.includes(question.id) && (
-                          <div className="mb-4" dir="rtl">
-                            <p className="text-right">تفسير الاجابة</p>
-
-                            {question.explanation ? (
-                              <FroalaEditorView
-                                config={{ direction: "rtl" }}
-                                model={question.explanation}
-                              />
-                            ) : (
-                              "لا يوجد تفسير"
-                            )}
-                          </div>
+                        {/* Check mark for correct answer */}
+                        {optionIndex + 1 === parseInt(question.answer) && (
+                          <Check className="text-green-700" /> // Green check icon for correct answer
                         )}
-                    </div>
+                        {/* Cross for wrong answer */}
+                        {wrongAnswersQuiz.includes(question.id) &&
+                          isOptionSelected(question.id, optionIndex) && (
+                            <X className="text-red-700" /> // Red cross icon for wrong answer
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex space-x-2">
+                        <label className="block capitalize text-sm">{option.text}</label>
+                        <input
+                          className="mr-2"
+                          type="radio"
+                          disabled={disableSelect}
+                          name={question.id}
+                          value={optionIndex + 1}
+                          checked={isOptionSelected(question.id, optionIndex)}
+                          onChange={() => handleOptionChange(question.id, optionIndex)}
+                        />
+                      </div>
+                    )}
                   </div>
-                </div>
-              </CarouselItem>
-            ))}
+                ))}
+
+                {/* Show explanation for wrong answers */}
+                {hasSubmitted && wrongAnswersQuiz.includes(question.id) && (
+                  <div className="mb-4" dir="rtl">
+                    <p className="text-right">تفسير الاجابة</p>
+                    {question.explanation ? (
+                      <FroalaEditorView config={{ direction: "rtl" }} model={question.explanation} />
+                    ) : (
+                      "لا يوجد تفسير"
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </CarouselItem>
+      ))}
+
+
 
             <div className="flex flex-col justify-end items-end w-full space-y-3 mr-8 md:mr-20">
               <div className="flex flex-row space-x-4 items-center">
@@ -405,3 +414,4 @@ const ExamIdPage = ({
 };
 
 export default ExamIdPage;
+
