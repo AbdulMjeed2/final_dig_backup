@@ -29,3 +29,4 @@ const CertificatePage = ({
 };
 
 export default CertificatePage;
+
