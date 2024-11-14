@@ -115,7 +115,7 @@ export const CourseSidebarItem = ({
       ref?.removeEventListener("click", handleClick);
     };
   }, [handleChapterClick]); // Empty dependency array to run the effect only once
-
+  
   return (
     <>
       <Accordion type="single" collapsible>
