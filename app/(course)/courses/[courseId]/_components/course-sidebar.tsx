@@ -134,36 +134,39 @@ export const CourseSidebar = async ({
       </div>
       <div className="flex flex-col w-full">
       {starterExam && (
-              <button
-              type="button"
-              disabled={true}
-              className={cn(
-                `flex items-center ${pathname.includes(starterExamProgress?.lessonId || "") ? "text-red-700" : ""} justify-end w-full gap-x-2 ${starterExamProgress?.isCompleted ? 'text-sky-700' : 'text-slate-600'}  text-sm font-[500] transition-all px-4 hover:text-slate-700 hover:bg-gray-300 border-r-4 border-opacity-0 hover:border-opacity-95 border-gray-600 h-full`,
-                
-              )}
-            >
-              <div className="flex items-center justify-between text-right w-full gap-x-2 py-4">
-                {starterExamProgress?.isCompleted ? (
-                  <CheckCircle
-                    size={22}
-                    className={cn(
-                      "text-sky-500",
-                      pathname?.includes(starterExam.id) && "text-gray-800"
-                    )}
-                  />
-                ) : (
-                  <PlayCircle
-                    size={22}
-                    className={cn(
-                      "text-slate-500",
-                      pathname?.includes(starterExam.id) && "text-slate-700"
-                    )}
-                  />
-                )}
-                <div>{starterExam.title}</div>
-              </div>
-            </button>
-            )}
+  <button
+    type="button"
+    disabled={true}
+    className={cn(
+      `flex items-center justify-end w-full gap-x-2 
+      ${pathname.includes(starterExamProgress?.lessonId || "") ? "text-red-700 bg-green-100" : ""} 
+      ${starterExamProgress?.isCompleted ? 'text-sky-700 bg-blue-100' : 'text-slate-600'}  
+      text-sm font-[500] transition-all px-4 hover:text-slate-700 hover:bg-gray-300 
+      border-r-4 border-opacity-0 hover:border-opacity-95 border-gray-600 h-full`
+    )}
+  >
+    <div className="flex items-center justify-between text-right w-full gap-x-2 py-4">
+      {starterExamProgress?.isCompleted ? (
+        <CheckCircle
+          size={22}
+          className={cn(
+            "text-sky-500",
+            pathname?.includes(starterExam.id) && "text-gray-800"
+          )}
+        />
+      ) : (
+        <PlayCircle
+          size={22}
+          className={cn(
+            "text-slate-500",
+            pathname?.includes(starterExam.id) && "text-slate-700"
+          )}
+        />
+      )}
+      <div>{starterExam.title}</div>
+    </div>
+  </button>
+)}
         {course.chapters.map((chapter,chapterIndex) => {
           let a: ({ id: string; title: string; description: string | null; videoUrl: string | null; position: number; isPublished: boolean; chapterId: string; createdAt: Date; updatedAt: Date; } & { userProgress: { id: string; userId: string; lessonId: string; isCompleted: boolean; createdAt: Date; updatedAt: Date; }[] | null; })[] = []
           let tempLessons = chapter.lessons
@@ -241,81 +244,58 @@ export const CourseSidebar = async ({
 })}
       </div>
       <div>
-        { task?.id && (
+      {task?.id && (
                 <Link
-                type="button"
-                href={(progressCount >= 90) ?`/courses/${course.id}/task/${task.id}` : "#"}
-                className={cn(
-                  `flex items-center ${pathname.includes(starterExamProgress?.lessonId || "") ? "text-red-700" : ""} justify-end w-full gap-x-2 text-slate-600 text-sm font-[500] transition-all px-4 hover:text-slate-700 hover:bg-gray-300 border-r-4 border-opacity-0 hover:border-opacity-95 border-gray-600 h-full`,
-                  
-                )}
-              >
-                <div className="flex items-center justify-between text-right w-full gap-x-2 py-4">
-                  {!(progressCount >= 90) ? (
-                    <LockIconWrapper
-                      className={cn(
-                        "text-gray-700",
-                        pathname?.includes(exam?.id) && "text-gray-800"
-                      )}
-                    />
-                  ) : !taskCompleted ? <PlayCircle
-                  size={22}
+                  type="button"
+                  href={(progressCount >= 90) ?`/courses/${course.id}/task/${task.id}` : "#"}
                   className={cn(
-                    "text-slate-500",
-                    pathname?.includes(exam?.id) && "text-slate-700"
+                    `flex items-center justify-end w-full gap-x-2 
+                    ${pathname.includes(task.id || "") ? "text-red-700 bg-green-100" : ""}
+                    ${taskCompleted ? 'text-sky-700 bg-blue-100' : 'text-slate-600'}  
+                    text-sm font-[500] transition-all px-4 hover:text-slate-700 hover:bg-gray-300 
+                    border-r-4 border-opacity-0 hover:border-opacity-95 border-gray-600 h-full`
                   )}
-                /> : (
-                    <CheckCircle
-                      size={22}
-                      className={cn(
-                        "text-slate-500",
-                        pathname?.includes(exam?.id) && "text-slate-700"
-                      )}
-                    />
-                  )}
-                  <div> {task.title}</div>
-                </div>
-              </Link>
+                >
+                  <div className="flex items-center justify-between text-right w-full gap-x-2 py-4">
+                    {!(progressCount >= 90) ? (
+                      <LockIconWrapper className={cn("text-gray-700", pathname?.includes(exam?.id) && "text-gray-800")} />
+                    ) : !taskCompleted ? (
+                      <PlayCircle size={22} className={cn("text-slate-500", pathname?.includes(exam?.id) && "text-slate-700")} />
+                    ) : (
+                      <CheckCircle size={22} className={cn("text-sky-500", pathname?.includes(exam?.id) && "text-slate-700")} />
+                    )}
+                    <div> {task.title}</div>
+                  </div>
+                </Link>
               )}
+
 
       </div>
       <div>
-        { exam?.id && (
-                <Link
-                type="button"
-                href={((progressCount >= 90) && taskCompleted) ?`/courses/${course.id}/exam/${exam?.id}` : "#"}
-                className={cn(
-                  `flex items-center ${pathname.includes(starterExamProgress?.lessonId || "") ? "text-red-700" : ""} justify-end w-full gap-x-2 ${examCompleted?.isCompleted ? "text-sky-700" : 'text-slate-600'} text-sm font-[500] transition-all px-4 hover:text-slate-700 hover:bg-gray-300 border-r-4 border-opacity-0 hover:border-opacity-95 border-gray-600 h-full`,
-                  
-                )}
-              >
-                <div className="flex items-center justify-between text-right w-full gap-x-2 py-4">
-                  { (!(progressCount >= 90) || !taskCompleted) ? (
-                    <LockIconWrapper
-                      className={cn(
-                        "text-gray-700",
-                        pathname?.includes(exam?.id) && "text-gray-800"
-                      )}
-                    />
-                  ) : !examCompleted?.isCompleted ? <PlayCircle
-                  size={22}
-                  className={cn(
-                    "text-slate-500",
-                    pathname?.includes(exam?.id) && "text-slate-700"
-                  )}
-                /> : (
-                    <CheckCircle
-                      size={22}
-                      className={cn(
-                        "text-sky-500",
-                        pathname?.includes(exam?.id) && "text-sky-700"
-                      )}
-                    />
-                  )}
-                  <div>{exam.title}</div>
-                </div>
-              </Link>
-              )}
+      {exam?.id && (
+        <Link
+          type="button"
+          href={((progressCount >= 90) && taskCompleted) ?`/courses/${course.id}/exam/${exam?.id}` : "#"}
+          className={cn(
+            `flex items-center justify-end w-full gap-x-2 
+            ${pathname.includes(exam.id || "") ? "text-red-700 bg-green-100" : ""}
+            ${examCompleted?.isCompleted ? 'text-sky-700 bg-blue-100' : 'text-slate-600'}  
+            text-sm font-[500] transition-all px-4 hover:text-slate-700 hover:bg-gray-300 
+            border-r-4 border-opacity-0 hover:border-opacity-95 border-gray-600 h-full`
+          )}
+        >
+          <div className="flex items-center justify-between text-right w-full gap-x-2 py-4">
+            {(!(progressCount >= 90) || !taskCompleted) ? (
+              <LockIconWrapper className={cn("text-gray-700", pathname?.includes(exam?.id) && "text-gray-800")} />
+            ) : !examCompleted?.isCompleted ? (
+              <PlayCircle size={22} className={cn("text-slate-500", pathname?.includes(exam?.id) && "text-slate-700")} />
+            ) : (
+              <CheckCircle size={22} className={cn("text-sky-500", pathname?.includes(exam?.id) && "text-slate-700")} />
+            )}
+            <div>{exam.title}</div>
+          </div>
+        </Link>
+      )}
 
       </div>
       {
@@ -328,3 +308,4 @@ export const CourseSidebar = async ({
     </div>
   );
 };
+
