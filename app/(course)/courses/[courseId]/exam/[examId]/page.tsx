@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/carousel";
 import { escape } from "querystring";
 import FroalaEditorView from "react-froala-wysiwyg/FroalaEditorView";
+import { FormButton2 } from "../../_components/formButton2";
 
 type ExamWithQuestionsAndOptions = Prisma.ExamGetPayload<{
   include: {
@@ -332,7 +333,7 @@ const ExamIdPage = ({
   if (!userId) {
     return redirect("/");
   }
-
+  
   return (
     <>
       {exam ? (
@@ -355,8 +356,8 @@ const ExamIdPage = ({
               </div>
               <div className="flex flex-col space-y-4 ">
                 <p>مجموع الاسئلة: {exam?.questions.length}</p>
-                <p>عدد الآسئلة الصحيحة: {correctAnswers}</p>
-                <p>عدد الآسئلة الخاطئة: {wrongAnswers}</p>
+                <p>عدد الأسئلة الصحيحة: {correctAnswers}</p>
+                <p>عدد الأسئلة الخاطئة: {wrongAnswers}</p>
                 <p>النسبة المئوية: % {scorePercentage.toFixed(1)} </p>
               </div>
               <button
@@ -431,189 +432,178 @@ const ExamIdPage = ({
             </div>
           )
         ) : (
-          <div className="pb-10 flex flex-col px-10 gap-4 py-4">
-            {hasSubmitted ? (
-              <Banner
-                variant={"success"}
-                label={`الأسئلة التي تمت الإجابة عليها: ${answeredQuestions}    |    الإجابات الصحيحة: ${correctAnswers}    |    إجابات خاطئة: ${wrongAnswers} `}
-              />
-            ) : (
-              <div className="w-full flex flex-col gap-4 justify-center items-end h-12">
-                <div className="flex space-x-4 items-center">
-                  <h1 className="text-lg md:text-xl font-medium capitalize">
-                    مجموع الأسئلة {exam?.questions.length}
-                  </h1>
+          <><div className="pb-10 flex flex-col px-10 gap-4 py-4">
+              {hasSubmitted ? (
+                <Banner
+                  variant={"success"}
+                  label={`الأسئلة التي تمت الإجابة عليها: ${answeredQuestions}    |    الإجابات الصحيحة: ${correctAnswers}    |    إجابات خاطئة: ${wrongAnswers} `} />
+              ) : (
+                <div className="w-full flex flex-col gap-4 justify-center items-end h-12">
+                  <div className="flex space-x-4 items-center">
+                    <h1 className="text-lg md:text-xl font-medium capitalize">
+                      مجموع الأسئلة {exam?.questions.length}
+                    </h1>
 
-                  <span className="mx-4">|</span>
+                    <span className="mx-4">|</span>
 
-                  <h1 className="text-lg md:text-2xl font-medium capitalize">
-                    {exam?.title}
-                  </h1>
-                  <span className="mx-4">|</span>
-                  <h1 className="text-lg md:text-2xl font-medium capitalize">
-                    {course?.title}
-                  </h1>
-                </div>
-                {isFirstExam && (
-                  <div className="flex space-x-3 ">
-                    <div className="text-md">
-                      {" "}
-                      <FroalaEditorView model={exam.description} />
-                    </div>
+                    <h1 className="text-lg md:text-2xl font-medium capitalize">
+                      {exam?.title}
+                    </h1>
+                    <span className="mx-4">|</span>
+                    <h1 className="text-lg md:text-2xl font-medium capitalize">
+                      {course?.title}
+                    </h1>
                   </div>
-                )}
-              </div>
-            )}
-
-            <div className="flex flex-col items-center relative">
-              {exam?.questions
-                .sort((a, b) =>
-                  a.position > b.position ? 1 : b.position > a.position ? -1 : 0
-                )
-                .map((question, index) => (
-                  <CarouselItem key={index} className="w-full mb-4">
-                    <div className="bg-sky-100 border border-slate-200 rounded-lg p-4 max-w-full ">
-                      <div className="w-full flex h-fit flex-col items-end">
-                        <div className="font-medium text-slate-500 mb-4 text-right">
-                          سؤال {index + 1}
-                        </div>
-                        <div
-                          className="text-slate-700 mb-4 font-bold text-lg"
-                          dir="rtl"
-                        >
-                          <FroalaEditorView model={question.prompt} />
-                        </div>
-                        {question.explanation && (
-                          <div
-                            className="text-slate-700 font-bold -mr-4 -mt-1 mb-4"
-                            dir="rtl"
-                          >
-                            <FroalaEditorView model={question.explanation} />
-                          </div>
-                        )}
-                        <div className="flex flex-col items-end space-y-2 w-full mb-4 ">
-                          {question.options
-                            .sort((a, b) =>
-                              a.position > b.position
-                                ? 1
-                                : b.position > a.position
-                                ? -1
-                                : 0
-                            )
-                            .map((option, index) => {
-                              option.position = index + 1;
-                              console.log(option.position);
-                              return (
-                                <div key={option.id}>
-                                  {hasSubmitted || isSubmitting ? (
-                                    <div className="flex space-x-2">
-                                      <label
-                                        className="capitalize text-sm"
-                                        dir="rtl"
-                                      >
-                                        {option.text}
-                                      </label>
-                                      <input
-                                        className="mr-2"
-                                        type="radio"
-                                        name={question.id}
-                                        value={index + 1}
-                                        disabled={disableSelect}
-                                      />
-                                    </div>
-                                  ) : (
-                                    <div className="flex space-x-2">
-                                      <label
-                                        className="block capitalize text-sm"
-                                        dir="rtl"
-                                      >
-                                        {option.text}
-                                      </label>
-
-                                      <input
-                                        className="mr-2"
-                                        type="radio"
-                                        name={question.id}
-                                        value={index + 1}
-                                        disabled={disableSelect}
-                                        checked={
-                                          userSelections[question.id] ==
-                                          index + 1
-                                        }
-                                        onChange={() =>
-                                          handleOptionChange(
-                                            question.id,
-                                            option.position
-                                          )
-                                        }
-                                      />
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            })}
-                        </div>
+                  {isFirstExam && (
+                    <div className="flex space-x-3 ">
+                      <div className="text-md">
+                        {" "}
+                        <FroalaEditorView model={exam.description} />
                       </div>
-                    </div>
-                  </CarouselItem>
-                ))}
-
-              <div className="flex flex-col justify-end items-end w-full space-y-3">
-                {hasSubmitted && scorePercentage != undefined ? (
-                  <div className="text-right w-1/2">
-                    {`لقد سجلت النسبة المئوية ${scorePercentage.toFixed(1)}% ${
-                      hasTakenTheExamBefore
-                        ? "ستتم إضافة درجاتك وتجميعها مع النتيجة التي تحصل عليها عند إجراء الاختبار بعد تعلم الدورة"
-                        : "تهانينا!"
-                    } `}
-                  </div>
-                ) : (
-                  ""
-                )}
-                <div className="flex flex-row space-x-4 items-center">
-                  {!disableSelect && (
-                    <div className="flex flex-row-reverse gap-4 space-x-4 items-center">
-                      {hasSubmitted && !isFirstExam ? (
-                        ""
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={handleSubmit}
-                          disabled={!canSubmit || isSubmitting || hasSubmitted}
-                          className={cn(
-                            "bg-sky-500 text-white w-fit font-bold text-sm px-4 py-2 rounded-md",
-                            (!canSubmit || isSubmitting || hasSubmitted) &&
-                              "bg-slate-400 cursor-not-allowed"
-                          )}
-                        >
-                          تقدم
-                        </button>
-                      )}
-
-                      {certificateId !== "" &&
-                        certificateId !== undefined &&
-                        hasSubmitted &&
-                        !isFirstExam &&
-                        scorePercentage >= 50 && (
-                          <PrepareCertificateModal
-                            courseId={params.courseId}
-                            examId={params.examId}
-                            certificateId={certificateId}
-                          >
-                            <Button
-                              size="sm"
-                              className="bg-sky-500 text-white hover:bg-sky-400"
-                            >
-                              احصل على شهادتك
-                            </Button>
-                          </PrepareCertificateModal>
-                        )}
                     </div>
                   )}
                 </div>
+              )}
+
+              <div className="flex flex-col items-center relative">
+                {exam?.questions
+                  .sort((a, b) => a.position > b.position ? 1 : b.position > a.position ? -1 : 0
+                  )
+                  .map((question, index) => (
+                    <CarouselItem key={index} className="w-full mb-4">
+                      <div className="bg-sky-100 border border-slate-200 rounded-lg p-4 max-w-full ">
+                        <div className="w-full flex h-fit flex-col items-end">
+                          <div className="font-medium text-slate-500 mb-4 text-right">
+                            سؤال {index + 1}
+                          </div>
+                          <div
+                            className="text-slate-700 mb-4 font-bold text-lg"
+                            dir="rtl"
+                          >
+                            <FroalaEditorView model={question.prompt} />
+                          </div>
+                          {question.explanation && (
+                            <div
+                              className="text-slate-700 font-bold -mr-4 -mt-1 mb-4"
+                              dir="rtl"
+                            >
+                              <FroalaEditorView model={question.explanation} />
+                            </div>
+                          )}
+                          <div className="flex flex-col items-end space-y-2 w-full mb-4 ">
+                            {question.options
+                              .sort((a, b) => a.position > b.position
+                                ? 1
+                                : b.position > a.position
+                                  ? -1
+                                  : 0
+                              )
+                              .map((option, index) => {
+                                option.position = index + 1;
+                                console.log(option.position);
+                                return (
+                                  <div key={option.id}>
+                                    {hasSubmitted || isSubmitting ? (
+                                      <div className="flex space-x-2">
+                                        <label
+                                          className="capitalize text-sm"
+                                          dir="rtl"
+                                        >
+                                          {option.text}
+                                        </label>
+                                        <input
+                                          className="mr-2"
+                                          type="radio"
+                                          name={question.id}
+                                          value={index + 1}
+                                          disabled={disableSelect} />
+                                      </div>
+                                    ) : (
+                                      <div className="flex space-x-2">
+                                        <label
+                                          className="block capitalize text-sm"
+                                          dir="rtl"
+                                        >
+                                          {option.text}
+                                        </label>
+
+                                        <input
+                                          className="mr-2"
+                                          type="radio"
+                                          name={question.id}
+                                          value={index + 1}
+                                          disabled={disableSelect}
+                                          checked={userSelections[question.id] ==
+                                            index + 1}
+                                          onChange={() => handleOptionChange(
+                                            question.id,
+                                            option.position
+                                          )} />
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                          </div>
+                        </div>
+                      </div>
+                    </CarouselItem>
+                  ))}
+
+                <div className="flex flex-col justify-end items-end w-full space-y-3">
+                  {hasSubmitted && scorePercentage != undefined ? (
+                    <div className="text-right w-1/2">
+                      {`لقد سجلت النسبة المئوية ${scorePercentage.toFixed(1)}% ${hasTakenTheExamBefore
+                          ? "ستتم إضافة درجاتك وتجميعها مع النتيجة التي تحصل عليها عند إجراء الاختبار بعد تعلم الدورة"
+                          : "تهانينا!"} `}
+                    </div>
+                  ) : (
+                    ""
+                  )}
+                  <div className="flex flex-row space-x-4 items-center">
+                    {!disableSelect && (
+                      <div className="flex flex-row-reverse gap-4 space-x-4 items-center">
+                        {hasSubmitted && !isFirstExam ? (
+                          ""
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={handleSubmit}
+                            disabled={!canSubmit || isSubmitting || hasSubmitted}
+                            className={cn(
+                              "bg-sky-500 text-white w-fit font-bold text-sm px-4 py-2 rounded-md",
+                              (!canSubmit || isSubmitting || hasSubmitted) &&
+                              "bg-slate-400 cursor-not-allowed"
+                            )}
+                          >
+                            تقدم
+                          </button>
+                        )}
+
+                        {certificateId !== "" &&
+                          certificateId !== undefined &&
+                          hasSubmitted &&
+                          !isFirstExam &&
+                          scorePercentage >= 50 && (
+                            <PrepareCertificateModal
+                              courseId={params.courseId}
+                              examId={params.examId}
+                              certificateId={certificateId}
+                            >
+                              <Button
+                                size="sm"
+                                className="bg-sky-500 text-white hover:bg-sky-400"
+                              >
+                                احصل على شهادتك
+                              </Button>
+                            </PrepareCertificateModal>
+                          )}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
+            </div><FormButton2 /></>
         )
       ) : (
         <div className="flex items-center justify-center h-full w-full">
