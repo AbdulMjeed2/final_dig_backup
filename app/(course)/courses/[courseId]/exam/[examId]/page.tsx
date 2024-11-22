@@ -117,28 +117,20 @@ const ExamIdPage = ({
     sethasSubmitted(false);
     setFailedInExam(false);
     setCanSubmit(false);
+    setDisableSelect(false);
+    // Optionally reset other states if necessary
   };
   const isPreTestRetakeAllowed = exam?.starterExam && !hasSubmitted && !hasTakenTheExamBefore;
   const handleSubmit = useCallback(async () => {
     if (!exam || !hasUserSelections || hasSubmitted) return;
-
-    // Prevent submitting if the exam is a starter exam and the user has already taken it
-    if (exam.starterExam && hasTakenTheExamBefore && !setFailedInExam) {
-      toast.error("لا يمكنك إعادة الاختبار القبلي.");
-      return;
-    }
-
+  
     setIsSubmitting(true);
-
+  
     try {
       const fieldToUpdate = hasTakenTheExamBefore ? "afterScore" : "beforeScore";
-
+  
       sethasSubmitted(true);
-
-      if (isFirstExam) {
-        toast.success("يمكنك الان البدء في الدورة التدريبية");
-      }
-
+  
       // Update progress in the backend
       const response = await axios.patch(
         `/api/courses/${params.courseId}/exam/${params.examId}/progress`,
@@ -148,49 +140,34 @@ const ExamIdPage = ({
           userSelections,
         }
       );
-
-      if (!isFirstExam) {
-        // If score is less than 50, allow the user to retake the test
-        if (scorePercentage < 50) {
-          setFailedInExam(true);
-          toast.error(
-            `لقد احرزت علامة ${scorePercentage.toFixed(1)}. يمكنك إعادة الاختبار بعد مراجعة الدورة التدريبية مرة أخرى.`
-          );
+  
+      if (scorePercentage >= 50 && !isFirstExam) {
+        toast.success(`احسنت! لقد أحرزت علامة ${scorePercentage.toFixed(1)}.`);
+  
+        // Request to generate the certificate
+        const certificateResponse = await axios.post(
+          `/api/courses/${params.courseId}/exam/${params.examId}/certificate`
+        );
+  
+        if (certificateResponse.status === 200) {
+          toast.success("شهادتك جاهزة!");
+          setCertificateId(certificateResponse.data.id);
+          confetti.onOpen();
         } else {
-          // If the score is 50 or more, issue the certificate
-          toast.success(
-            `احسنت! لقد أحرزت علامة ${scorePercentage.toFixed(1)}.`
-          );
-
-          // Request to generate the certificate
-          const certificateResponse = await axios.post(
-            `/api/courses/${params.courseId}/exam/${params.examId}/certificate`
-          );
-
-          if (certificateResponse.status === 200) {
-            toast.success("شهادتك جاهزة!");
-            setCertificateId(certificateResponse.data.id);
-            confetti.onOpen();
-          } else {
-            toast.error("لا يمكن إنشاء شهادة في هذا الوقت، آسف!");
-          }
+          toast.error("لا يمكن إنشاء شهادة في هذا الوقت، آسف!");
         }
+      } else if (scorePercentage < 50) {
+        setFailedInExam(true);
+        toast.error(
+          `لقد احرزت علامة ${scorePercentage.toFixed(1)}. يمكنك إعادة الاختبار بعد مراجعة الدورة التدريبية مرة أخرى.`
+        );
       }
-
-      // Refresh the page if it's the first exam
-      if (response) {
-        if (isFirstExam) {
-          router.refresh();
-        }
-      }
-
+  
       console.log("====================================");
+      console.log(response.data);
       console.log("====================================");
     } catch (error) {
-      console.log("====================================");
-      console.log(error);
-      console.log("====================================");
-
+      console.error("Error submitting exam:", error);
       toast.error("هناك شئ غير صحيح");
     } finally {
       setIsSubmitting(false);
@@ -208,7 +185,6 @@ const ExamIdPage = ({
     isFirstExam,
     router
   ]);
-
 
   // Get the exam data and update the time remaining
   useEffect(() => {
