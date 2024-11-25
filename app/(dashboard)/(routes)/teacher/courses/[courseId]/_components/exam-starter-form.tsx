@@ -4,11 +4,13 @@ import * as z from "zod";
 import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Delete, Loader2, Pencil, PlusCircle } from "lucide-react";
+import { Delete, Loader2, Pencil, PlusCircle} from "lucide-react";
+
+
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { Chapter, Course, Exam } from "@prisma/client";
+import { Course, Exam } from "@prisma/client";
 
 import {
   Form,
@@ -32,17 +34,13 @@ interface ExamFormProps {
 const formSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
-  starter: z.boolean()
+  type: z.enum(["exam", "form"]),
+  starter: z.boolean(),
+  url: z.string().url().optional(), // Required only if type is 'form'
 });
 
 export const StarterExamForm = ({ initialData, courseId }: ExamFormProps) => {
   const [isCreating, setIsCreating] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const toggleCreating = () => {
-    setIsCreating((current) => !current);
-  };
-  const starterExams = initialData.exams?.filter((e:any) => e.starterExam == true)
-
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -50,7 +48,9 @@ export const StarterExamForm = ({ initialData, courseId }: ExamFormProps) => {
     defaultValues: {
       title: "",
       description: "",
-      starter: true
+      type: "exam",
+      starter: true,
+      url: "",
     },
   });
 
@@ -58,64 +58,53 @@ export const StarterExamForm = ({ initialData, courseId }: ExamFormProps) => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const response = await axios.post(
-        `/api/courses/${courseId}/exam`,
-        values
-      );
-      toast.success("تم إنشاء الامتحان");
-
-      toggleCreating();
-
+      if (values.type === "exam") {
+        await axios.post(`/api/courses/${courseId}/exam`, values);
+      } else if (values.type === "form") {
+        await axios.post(`/api/courses/${courseId}/form`, values);
+      }
+      toast.success("تم إنشاء الامتحان/الرابط");
+      setIsCreating(false);
       router.refresh();
     } catch (error) {
-      console.log("====================================");
-      console.log(error);
-      console.log("====================================");
       toast.error("هناك شئ غير صحيح");
     }
   };
 
-  const onEdit = (id: string | null) => {
-    router.push(`/teacher/courses/${courseId}/exam/${id}`);
-  };
-  const onDelete = async (id: string | undefined) => {
-    try {
-      //  setIsDeleting(true);
-      debugger
-      
-      await axios.delete(
-        `/api/courses/${courseId}/exam/${id}`
-      );
-      //deleted(id)
-      toast.success("تم حذف الخيار");
-      router.refresh();
-    } catch {
-      toast.success("تم حذف الخيار");
-      router.refresh();
-
-    } finally {
-    //  setIsDeleting(false);
+  const onEdit = (id: string | null, type: string) => {
+    if (type === "exam") {
+      router.push(`/teacher/courses/${courseId}/exam/${id}`);
+    } else if (type === "form") {
+      router.push(`/teacher/courses/${courseId}/form/${id}`);
     }
   };
+
+  const onDelete = async (id: string | undefined, type: string) => {
+    try {
+      if (type === "exam") {
+        await axios.delete(`/api/courses/${courseId}/exam/${id}`);
+      } else if (type === "form") {
+        await axios.delete(`/api/courses/${courseId}/form/${id}`);
+      }
+      toast.success("تم حذف العنصر");
+      router.refresh();
+    } catch (error) {
+      toast.error("فشل في الحذف");
+    }
+  };
+
+  const starterItems = initialData.exams?.filter(
+    (item: any) => item.starter === true
+  );
+
   return (
     <div className="relative mt-6 border bg-slate-100 rounded-md p-4">
-      {isUpdating && (
-        <div className="absolute h-full w-full bg-slate-500/20 top-0 right-0 rounded-m flex items-center justify-center">
-          <Loader2 className="animate-spin h-6 w-6 text-sky-700" />
-        </div>
-      )}
       <div className="font-medium flex items-center justify-between">
-      امتحان الدورة
-        {!(starterExams?.length > 0) && (
-          <Button onClick={toggleCreating} variant="ghost">
-            {isCreating ? (
-              <>إلغاء</>
-            ) : (
-              <>
-                <PlusCircle className="h-4 w-4 mr-2" />
-                إضافة الامتحان
-              </>
-            )}
+        امتحان الدورة / رابط النموذج
+        {starterItems?.length === 0 && (
+          <Button onClick={() => setIsCreating(true)} variant="ghost">
+            <PlusCircle className="h-4 w-4 mr-2" />
+            إضافة
           </Button>
         )}
       </div>
@@ -125,6 +114,38 @@ export const StarterExamForm = ({ initialData, courseId }: ExamFormProps) => {
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-4 mt-4"
           >
+
+<FormField
+  control={form.control}
+  name="type"
+  render={({ field }) => (
+    <FormItem>
+      <FormControl>
+        <div>
+          <label>
+            <input
+              type="radio"
+              value="exam"
+              checked={field.value === "exam"}
+              onChange={field.onChange}
+            />
+            المقياس 
+          </label>
+          <label>
+            <input
+              type="radio"
+              value="form"
+              checked={field.value === "form"}
+              onChange={field.onChange}
+            />
+            الاختبار
+          </label>
+        </div>
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
             <Label>-:عنوان</Label>
             <FormField
               control={form.control}
@@ -132,10 +153,9 @@ export const StarterExamForm = ({ initialData, courseId }: ExamFormProps) => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    
                     <Input
                       disabled={isSubmitting}
-                      placeholder="e.g. 'امتحان تطوير الويب" 
+                      placeholder="e.g. 'امتحان تطوير الويب'"
                       {...field}
                     />
                   </FormControl>
@@ -160,8 +180,30 @@ export const StarterExamForm = ({ initialData, courseId }: ExamFormProps) => {
                 </FormItem>
               )}
             />
-            <Button disabled={!isValid || isSubmitting} type="submit">
-            إنشاء
+            {form.watch("type") === "form" && (
+              <FormField
+                control={form.control}
+                name="url"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        disabled={isSubmitting}
+                        placeholder="e.g. https://example.com/form"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+            <Button
+              disabled={!isValid || isSubmitting}
+              type="submit"
+              className="mt-4"
+            >
+              إنشاء
             </Button>
           </form>
         </Form>
@@ -170,47 +212,41 @@ export const StarterExamForm = ({ initialData, courseId }: ExamFormProps) => {
         <div
           className={cn(
             "text-sm mt-2",
-            !initialData.exams  && "text-slate-500 italic"
+            !starterItems && "text-slate-500 italic"
           )}
         >
-          {starterExams?.map((exam:Exam, index:any) => {
-            return (
-              !exam ? (
-                "لا امتحان"
-              ) : (
-                <div
-                key={index}
+          {starterItems?.map((item: any, index: number) => (
+            <div
+              key={index}
+              className={cn(
+                "flex justify-between items-center py-3 pl-3 gap-x-2 bg-slate-200 border-slate-200 border text-slate-700 rounded-md mb-4 text-sm"
+              )}
+            >
+              <div>
+                {item.type === "exam" ? item.title : item.url}
+              </div>
+              <div className="ml-auto pr-2 flex items-center gap-x-2">
+                <Badge
                   className={cn(
-                    "flex justify-between items-center py-3 pl-3 gap-x-2 bg-slate-200 border-slate-200 border text-slate-700 rounded-md mb-4 text-sm"
+                    "bg-slate-500",
+                    item.isPublished && "bg-sky-700"
                   )}
                 >
-                  <div> {exam.title}</div>
-                  <div className="ml-auto pr-2 flex items-center gap-x-2">
-                    <Badge
-                      className={cn(
-                        "bg-slate-500",
-                        exam.isPublished && "bg-sky-700"
-                      )}
-                    >
-                      {exam.isPublished ? "نشرت" : "مسودة"}
-                    </Badge>
-                    <Delete
-                      onClick={() => onDelete(exam.id)}
-                      className="w-4 h-4 cursor-pointer hover:opacity-75 transition"
-                    />
-                    {
-
-                      <Pencil
-                        onClick={() => onEdit(exam.id)}
-                        className="w-4 h-4 cursor-pointer hover:opacity-75 transition"
-                      />
-                    }
-                  </div>
-                </div>
-              )
-            )
-          })
-          }
+                  {item.isPublished ? "نشرت" : "مسودة"}
+                </Badge>
+                <Delete
+                  onClick={() => onDelete(item.id, item.type)}
+                  className="w-4 h-4 cursor-pointer hover:opacity-75 transition"
+                />
+                {item.type === "exam" && (
+                  <Pencil
+                    onClick={() => onEdit(item.id, item.type)}
+                    className="w-4 h-4 cursor-pointer hover:opacity-75 transition"
+                  />
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
