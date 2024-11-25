@@ -61,7 +61,7 @@ export const StarterExamForm = ({ initialData, courseId }: ExamFormProps) => {
       if (values.type === "exam") {
         await axios.post(`/api/courses/${courseId}/exam`, values);
       } else if (values.type === "form") {
-        await axios.post(`/api/courses/${courseId}/form`, values);
+        await axios.post(`/api/courses/${courseId}/exam`, values);
       }
       toast.success("تم إنشاء الامتحان/الرابط");
       setIsCreating(false);
@@ -75,7 +75,7 @@ export const StarterExamForm = ({ initialData, courseId }: ExamFormProps) => {
     if (type === "exam") {
       router.push(`/teacher/courses/${courseId}/exam/${id}`);
     } else if (type === "form") {
-      router.push(`/teacher/courses/${courseId}/form/${id}`);
+      router.push(`/teacher/courses/${courseId}/exam/${id}`);
     }
   };
 
@@ -84,7 +84,7 @@ export const StarterExamForm = ({ initialData, courseId }: ExamFormProps) => {
       if (type === "exam") {
         await axios.delete(`/api/courses/${courseId}/exam/${id}`);
       } else if (type === "form") {
-        await axios.delete(`/api/courses/${courseId}/form/${id}`);
+        await axios.delete(`/api/courses/${courseId}/exam/${id}`);
       }
       toast.success("تم حذف العنصر");
       router.refresh();
