@@ -71,7 +71,8 @@ export const QuestionForm = ({
       form.setValue("prompt", "");
       router.refresh();
     } catch {
-      toast.error("هناك شئ غير صحيح");
+      //toast.error("هناك شئ غير صحيح");
+console.error("هناك شئ غير صحيح");
     }
   };
 
@@ -88,7 +89,8 @@ export const QuestionForm = ({
       toast.success("أعيد ترتيب الأسئلة");
       router.refresh();
     } catch {
-      toast.error("هناك شئ غير صحيح");
+      //toast.error("هناك شئ غير صحيح");
+console.error("هناك شئ غير صحيح");
     } finally {
       setIsUpdating(false);
     }

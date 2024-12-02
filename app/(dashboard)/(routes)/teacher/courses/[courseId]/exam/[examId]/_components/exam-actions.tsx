@@ -39,7 +39,8 @@ export const ExamActions = ({
 
       router.refresh();
     } catch {
-      toast.error("هناك شئ غير صحيح");
+      //toast.error("هناك شئ غير صحيح");
+console.error("هناك شئ غير صحيح");
     } finally {
       setIsLoading(false);
     }
@@ -55,7 +56,8 @@ export const ExamActions = ({
       router.push(`/teacher/courses/${courseId}`);
       router.refresh();
     } catch {
-      toast.error("هناك شئ غير صحيح");
+      //toast.error("هناك شئ غير صحيح");
+console.error("هناك شئ غير صحيح");
     } finally {
       setIsLoading(false);
     }

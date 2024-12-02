@@ -69,7 +69,8 @@ export const PrepareCertificateModal = ({
         `/courses/${courseId}/exam/${examId}/certificate/${certificateId}`
       );
     } catch {
-      toast.error("هناك شئ غير صحيح");
+      //toast.error("هناك شئ غير صحيح");
+console.error("هناك شئ غير صحيح");
     }
   };
   return (

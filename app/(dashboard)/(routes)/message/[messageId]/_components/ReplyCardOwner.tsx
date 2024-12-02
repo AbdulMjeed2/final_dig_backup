@@ -28,7 +28,8 @@ const ReplyCardOwner = ({msg, user}:Props) => {
          toast.success("تم حذف الرسالة");
        } catch (e){
          console.log(e)
-         toast.error("هناك شئ غير صحيح");
+         //toast.error("هناك شئ غير صحيح");
+console.error("هناك شئ غير صحيح");
        }
     }
     const today = new Date()

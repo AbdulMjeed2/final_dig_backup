@@ -59,7 +59,8 @@ export const ChaptersForm = ({ initialData, courseId }: ChaptersFormProps) => {
       form.setValue("title", "");
       router.refresh();
     } catch {
-      toast.error("هناك شئ غير صحيح");
+      //toast.error("هناك شئ غير صحيح");
+console.error("هناك شئ غير صحيح");
     }
   };
 
@@ -73,7 +74,8 @@ export const ChaptersForm = ({ initialData, courseId }: ChaptersFormProps) => {
       toast.success("أعيد ترتيب الفصول");
       router.refresh();
     } catch {
-      toast.error("هناك شئ غير صحيح");
+      //toast.error("هناك شئ غير صحيح");
+console.error("هناك شئ غير صحيح");
     } finally {
       setIsUpdating(false);
     }

@@ -82,7 +82,8 @@ export const OptionList = ({
       toast.success("تم حذف الخيار");
       router.refresh();
     } catch {
-      toast.error("هناك شئ غير صحيح");
+      //toast.error("هناك شئ غير صحيح");
+console.error("هناك شئ غير صحيح");
     } finally {
       setIsDeleting(false);
     }

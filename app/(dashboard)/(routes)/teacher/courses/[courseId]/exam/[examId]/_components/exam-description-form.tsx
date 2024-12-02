@@ -65,7 +65,8 @@ export const ExamDescriptionForm = ({
       toggleEdit();
       router.refresh();
     } catch {
-      toast.error("هناك شئ غير صحيح");
+      //toast.error("هناك شئ غير صحيح");
+console.error("هناك شئ غير صحيح");
     }
   };
 

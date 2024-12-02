@@ -66,7 +66,8 @@ export const TaskForm = ({ initialData, courseId }: ExamFormProps) => {
       console.log("====================================");
       console.log(error);
       console.log("====================================");
-      toast.error("هناك شئ غير صحيح");
+      //toast.error("هناك شئ غير صحيح");
+console.error("هناك شئ غير صحيح");
     }
   };
   const task = initialData

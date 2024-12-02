@@ -18,7 +18,8 @@ const MessageInput = ({setMessages,messageId} : {setMessages: Function,messageId
             setContext("")
           } catch (e){
             (e)
-            toast.error("هناك شئ غير صحيح");
+            //toast.error("هناك شئ غير صحيح");
+console.error("هناك شئ غير صحيح");
           }
         }
         else{
@@ -29,7 +30,8 @@ const MessageInput = ({setMessages,messageId} : {setMessages: Function,messageId
             setContext("")
           } catch (e){
             (e)
-            toast.error("هناك شئ غير صحيح");
+            //toast.error("هناك شئ غير صحيح");
+console.error("هناك شئ غير صحيح");
           }
 
         }

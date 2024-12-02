@@ -105,12 +105,31 @@ const ExamIdPage = ({
       [questionId]: optionPosition,
     }));
 
-    const isCorrectAnswer = (question: { options: { id: string; questionId: string; text: string; position: number; }[]; } & { id: string; examId: string; prompt: string; position: number; answer: string; isPublished: boolean; explanation: string | null; createdAt: Date; updatedAt: Date; }, optionPosition: number) => {
+    const isCorrectAnswer = (
+      question: {
+        options: {
+          id: string;
+          questionId: string;
+          text: string;
+          position: number;
+        }[];
+      } & {
+        id: string;
+        examId: string;
+        prompt: string;
+        position: number;
+        answer: string;
+        isPublished: boolean;
+        explanation: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+      },
+      optionPosition: number
+    ) => {
       return parseInt(question.answer) === optionPosition;
     };
-    
+
     // Within your render method
-    
   };
   const handleRepeat = () => {
     setUserSelections({});
@@ -120,17 +139,20 @@ const ExamIdPage = ({
     setDisableSelect(false);
     // Optionally reset other states if necessary
   };
-  const isPreTestRetakeAllowed = exam?.starterExam && !hasSubmitted && !hasTakenTheExamBefore;
+  const isPreTestRetakeAllowed =
+    exam?.starterExam && !hasSubmitted && !hasTakenTheExamBefore;
   const handleSubmit = useCallback(async () => {
     if (!exam || !hasUserSelections || hasSubmitted) return;
-  
+
     setIsSubmitting(true);
-  
+
     try {
-      const fieldToUpdate = hasTakenTheExamBefore ? "afterScore" : "beforeScore";
-  
+      const fieldToUpdate = hasTakenTheExamBefore
+        ? "afterScore"
+        : "beforeScore";
+
       sethasSubmitted(true);
-  
+
       // Update progress in the backend
       const response = await axios.patch(
         `/api/courses/${params.courseId}/exam/${params.examId}/progress`,
@@ -140,15 +162,15 @@ const ExamIdPage = ({
           userSelections,
         }
       );
-  
+
       if (scorePercentage >= 50 && !isFirstExam) {
         toast.success(`احسنت! لقد أحرزت علامة ${scorePercentage.toFixed(1)}.`);
-  
+
         // Request to generate the certificate
         const certificateResponse = await axios.post(
           `/api/courses/${params.courseId}/exam/${params.examId}/certificate`
         );
-  
+
         if (certificateResponse.status === 200) {
           toast.success("شهادتك جاهزة!");
           setCertificateId(certificateResponse.data.id);
@@ -159,16 +181,19 @@ const ExamIdPage = ({
       } else if (scorePercentage < 50) {
         setFailedInExam(true);
         toast.error(
-          `لقد احرزت علامة ${scorePercentage.toFixed(1)}. يمكنك إعادة الاختبار بعد مراجعة الدورة التدريبية مرة أخرى.`
+          `لقد احرزت علامة ${scorePercentage.toFixed(
+            1
+          )}. يمكنك إعادة الاختبار بعد مراجعة الدورة التدريبية مرة أخرى.`
         );
       }
-  
-      console.log("====================================");
-      console.log(response.data);
-      console.log("====================================");
+
+      // console.log("====================================");
+      // console.log(response.data);
+      // console.log("====================================");
     } catch (error) {
       console.error("Error submitting exam:", error);
-      toast.error("هناك شئ غير صحيح");
+      //toast.error("هناك شئ غير صحيح");
+      console.error("هناك شئ غير صحيح");
     } finally {
       setIsSubmitting(false);
     }
@@ -183,7 +208,7 @@ const ExamIdPage = ({
     userId,
     userSelections,
     isFirstExam,
-    router
+    router,
   ]);
 
   // Get the exam data and update the time remaining
@@ -208,13 +233,15 @@ const ExamIdPage = ({
       return router.push(`/courses/${course?.id}`);
     }, 1000);
   };
-  useEffect(() => {
-    // Start the countdown timer when the component mounts
-    const timerId = setInterval(countdown, 1000);
+  // To enable if we need the countdown (Not sure if we need to keep it.)
+  // Disabled it as the component keeps re-rendering and the countdown
+  // useEffect(() => {
+  //   // Start the countdown timer when the component mounts
+  //   const timerId = setInterval(countdown, 1000);
 
-    // Clear the interval when the component unmounts
-    return () => clearInterval(timerId);
-  }, []);
+  //   // Clear the interval when the component unmounts
+  //   return () => clearInterval(timerId);
+  // }, []);
 
   // useEffect(() => {
   //   if (
@@ -258,15 +285,14 @@ const ExamIdPage = ({
     // Enable submission when all questions are answered
   }, [exam?.questions, userSelections, hasSubmitted]);
 
-  
   useEffect(() => {
     if (answeredQuestions === exam?.questions.length) {
       setCanSubmit(true);
-      console.log("ss");
+      // console.log("ss");
     }
   }, [answeredQuestions, exam?.questions.length]);
   useEffect(() => {
-    console.log(exam);
+    // console.log(exam);
     if (exam?.starterExam) {
       setFirstExam(true);
     } else {
@@ -277,24 +303,29 @@ const ExamIdPage = ({
     (async () => {
       try {
         const response = await axios.get(`/api/courses/${params.courseId}`);
-        setExam(
-          response.data.exams.filter((e: any) => e.id == params.examId)[0]
-        );
+        const fetchedExam = response.data.exams.filter((e: any) => e.id === params.examId)[0];
+    
+        // Shuffle the questions directly
+        fetchedExam.questions = [...fetchedExam.questions].sort(() => Math.random() - 0.5);
+    
+        // Set the shuffled exam
+        setExam(fetchedExam);
 
-        console.log("====================================");
-        console.log(response.data);
-        console.log("====================================");
+        // console.log("====================================");
+        // console.log(response.data);
+        // console.log("====================================");
 
         setCourse(response.data);
 
-        console.log("====================================");
-        console.log(response.data.exams.certificate);
-        console.log("====================================");
+        // console.log("====================================");
+        // console.log(response.data.exams.certificate);
+        // console.log("====================================");
       } catch (error) {
-        console.log("====================================");
-        console.log(error);
-        console.log("====================================");
-        toast.error("هناك شئ غير صحيح");
+        console.error("====================================");
+        console.error(error);
+        console.error("====================================");
+        //toast.error("هناك شئ غير صحيح");
+        console.error("هناك شئ غير صحيح");
       }
     })();
 
@@ -309,7 +340,7 @@ const ExamIdPage = ({
   if (!userId) {
     return redirect("/");
   }
-  
+
   return (
     <>
       {exam ? (
@@ -331,10 +362,13 @@ const ExamIdPage = ({
                 </h1>
               </div>
               <div className="flex flex-col space-y-4 ">
-                <p>مجموع الاسئلة: {exam?.questions.length}</p>
+                <p>مجموع الأسئلة: {exam?.questions.length}</p>
                 <p>عدد الأسئلة الصحيحة: {correctAnswers}</p>
                 <p>عدد الأسئلة الخاطئة: {wrongAnswers}</p>
-                <p>النسبة المئوية: % {scorePercentage.toFixed(1)} </p>
+                <p>
+                  النسبة المئوية: {scorePercentage.toFixed(1)}
+                  {"%"}{" "}
+                </p>
               </div>
               <button
                 type="button"
@@ -358,10 +392,14 @@ const ExamIdPage = ({
                 </h1>
               </div>
               <div className="flex flex-col space-y-4 ">
-                <p>مجموع الاسئلة: {exam?.questions.length}</p>
+                <p>مجموع الأسئلة: {exam?.questions.length}</p>
                 <p>عدد الأسئلة الصحيحة: {correctAnswers}</p>
                 <p>عدد الأسئلة الخاطئة: {wrongAnswers}</p>
-                <p> النسبة المئوية: %{scorePercentage.toFixed(1)}</p>
+                <p>
+                  {" "}
+                  النسبة المئوية: {scorePercentage.toFixed(1)}
+                  {"%"}
+                </p>
               </div>
               <div>
                 <PrepareCertificateModal
@@ -391,10 +429,13 @@ const ExamIdPage = ({
                 </h1>
               </div>
               <div className="flex flex-col space-y-4 ">
-                <p>مجموع الاسئلة: {exam?.questions.length}</p>
+                <p>مجموع الأسئلة: {exam?.questions.length}</p>
                 <p>عدد الأسئلة الصحيحة: {correctAnswers}</p>
                 <p>عدد الأسئلة الخاطئة: {wrongAnswers}</p>
-                <p>النسبة المئوية:% {scorePercentage.toFixed(1)}</p>
+                <p>
+                  النسبة المئوية: {scorePercentage.toFixed(1)}
+                  {"%"}
+                </p>
               </div>
               <button
                 type="button"
@@ -408,11 +449,13 @@ const ExamIdPage = ({
             </div>
           )
         ) : (
-          <><div className="pb-10 flex flex-col px-10 gap-4 py-4">
+          <>
+            <div className="pb-10 flex flex-col px-10 gap-4 py-4">
               {hasSubmitted ? (
                 <Banner
                   variant={"success"}
-                  label={`الأسئلة التي تمت الإجابة عليها: ${answeredQuestions}    |    الإجابات الصحيحة: ${correctAnswers}    |    إجابات خاطئة: ${wrongAnswers} `} />
+                  label={`الأسئلة التي تمت الإجابة عليها: ${answeredQuestions}    |    الإجابات الصحيحة: ${correctAnswers}    |    إجابات خاطئة: ${wrongAnswers} `}
+                />
               ) : (
                 <div className="w-full flex flex-col gap-4 justify-center items-end h-12">
                   <div className="flex space-x-4 items-center">
@@ -443,8 +486,14 @@ const ExamIdPage = ({
 
               <div className="flex flex-col items-center relative">
                 {exam?.questions
-                  .sort((a, b) => a.position > b.position ? 1 : b.position > a.position ? -1 : 0
-                  )
+                  // Here i removed the order by position (So we can shuffle)
+                  // .sort((a, b) =>
+                  //   a.position > b.position
+                  //     ? 1
+                  //     : b.position > a.position
+                  //     ? -1
+                  //     : 0
+                  // )
                   .map((question, index) => (
                     <CarouselItem key={index} className="w-full mb-4">
                       <div className="bg-sky-100 border border-slate-200 rounded-lg p-4 max-w-full ">
@@ -468,15 +517,15 @@ const ExamIdPage = ({
                           )}
                           <div className="flex flex-col items-end space-y-2 w-full mb-4 ">
                             {question.options
-                              .sort((a, b) => a.position > b.position
-                                ? 1
-                                : b.position > a.position
+                              .sort((a, b) =>
+                                a.position > b.position
+                                  ? 1
+                                  : b.position > a.position
                                   ? -1
                                   : 0
                               )
                               .map((option, index) => {
                                 option.position = index + 1;
-                                console.log(option.position);
                                 return (
                                   <div key={option.id}>
                                     {hasSubmitted || isSubmitting ? (
@@ -492,7 +541,8 @@ const ExamIdPage = ({
                                           type="radio"
                                           name={question.id}
                                           value={index + 1}
-                                          disabled={disableSelect} />
+                                          disabled={disableSelect}
+                                        />
                                       </div>
                                     ) : (
                                       <div className="flex space-x-2">
@@ -509,12 +559,17 @@ const ExamIdPage = ({
                                           name={question.id}
                                           value={index + 1}
                                           disabled={disableSelect}
-                                          checked={userSelections[question.id] ==
-                                            index + 1}
-                                          onChange={() => handleOptionChange(
-                                            question.id,
-                                            option.position
-                                          )} />
+                                          checked={
+                                            userSelections[question.id] ==
+                                            index + 1
+                                          }
+                                          onChange={() =>
+                                            handleOptionChange(
+                                              question.id,
+                                              option.position
+                                            )
+                                          }
+                                        />
                                       </div>
                                     )}
                                   </div>
@@ -529,9 +584,13 @@ const ExamIdPage = ({
                 <div className="flex flex-col justify-end items-end w-full space-y-3">
                   {hasSubmitted && scorePercentage != undefined ? (
                     <div className="text-right w-1/2">
-                      {`لقد سجلت النسبة المئوية ${scorePercentage.toFixed(1)}% ${hasTakenTheExamBefore
+                      {`لقد سجلت النسبة المئوية ${scorePercentage.toFixed(
+                        1
+                      )}% ${
+                        hasTakenTheExamBefore
                           ? "ستتم إضافة درجاتك وتجميعها مع النتيجة التي تحصل عليها عند إجراء الاختبار بعد تعلم الدورة"
-                          : "تهانينا!"} `}
+                          : "تهانينا!"
+                      } `}
                     </div>
                   ) : (
                     ""
@@ -545,11 +604,13 @@ const ExamIdPage = ({
                           <button
                             type="button"
                             onClick={handleSubmit}
-                            disabled={!canSubmit || isSubmitting || hasSubmitted}
+                            disabled={
+                              !canSubmit || isSubmitting || hasSubmitted
+                            }
                             className={cn(
                               "bg-sky-500 text-white w-fit font-bold text-sm px-4 py-2 rounded-md",
                               (!canSubmit || isSubmitting || hasSubmitted) &&
-                              "bg-slate-400 cursor-not-allowed"
+                                "bg-slate-400 cursor-not-allowed"
                             )}
                           >
                             تقدم
@@ -579,7 +640,9 @@ const ExamIdPage = ({
                   </div>
                 </div>
               </div>
-            </div><FormButton2 /></>
+            </div>
+            <FormButton2 />
+          </>
         )
       ) : (
         <div className="flex items-center justify-center h-full w-full">

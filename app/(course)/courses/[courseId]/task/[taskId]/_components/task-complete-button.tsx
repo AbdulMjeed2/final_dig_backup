@@ -43,7 +43,8 @@ export const TaskCompeleteButton = ({
       toast.success("تم تحديث التقدم");
       router.refresh();
     } catch {
-      toast.error("هناك شئ غير صحيح");
+      //toast.error("هناك شئ غير صحيح");
+console.error("هناك شئ غير صحيح");
     } finally {
       setIsLoading(false);
     }

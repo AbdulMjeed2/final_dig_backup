@@ -67,7 +67,8 @@ export const LessonsForm = ({
       form.setValue("title", "");
       router.refresh();
     } catch {
-      toast.error("هناك شئ غير صحيح");
+      //toast.error("هناك شئ غير صحيح");
+console.error("هناك شئ غير صحيح");
     }
   };
 
@@ -84,7 +85,8 @@ export const LessonsForm = ({
       toast.success("تم إعادة ترتيب الدروس");
       router.refresh();
     } catch {
-      toast.error("هناك شئ غير صحيح");
+      //toast.error("هناك شئ غير صحيح");
+console.error("هناك شئ غير صحيح");
     } finally {
       setIsUpdating(false);
     }

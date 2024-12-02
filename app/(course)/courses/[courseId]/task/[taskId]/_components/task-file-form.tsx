@@ -42,7 +42,8 @@ export const TaskFileForm = ({
       router.refresh();
     } catch (e) {
       console.log(e)
-      toast.error("هناك شئ غير صحيح");
+      //toast.error("هناك شئ غير صحيح");
+console.error("هناك شئ غير صحيح");
     }
   };
 
@@ -53,7 +54,8 @@ export const TaskFileForm = ({
       toast.success("تم حذف المرفق");
       router.refresh();
     } catch {
-      toast.error("هناك شئ غير صحيح");
+      //toast.error("هناك شئ غير صحيح");
+console.error("هناك شئ غير صحيح");
     } finally {
       setDeletingId(null);
     }

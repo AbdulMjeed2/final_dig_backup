@@ -94,7 +94,8 @@ export const OptionForm = ({
       toast.success("تمت إعادة ترتيب خيارات الأسئلة");
       router.refresh();
     } catch {
-      toast.error("هناك شئ غير صحيح");
+      //toast.error("هناك شئ غير صحيح");
+console.error("هناك شئ غير صحيح");
     } finally {
       setIsUpdating(false);
     }
