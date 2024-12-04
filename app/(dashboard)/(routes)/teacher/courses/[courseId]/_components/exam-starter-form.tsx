@@ -4,8 +4,7 @@ import * as z from "zod";
 import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Delete, Loader2, Pencil, PlusCircle} from "lucide-react";
-
+import { Delete, Loader2, Pencil, PlusCircle } from "lucide-react";
 
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -68,7 +67,7 @@ export const StarterExamForm = ({ initialData, courseId }: ExamFormProps) => {
       router.refresh();
     } catch (error) {
       //toast.error("هناك شئ غير صحيح");
-console.error("هناك شئ غير صحيح");
+      console.error("هناك شئ غير صحيح");
     }
   };
 
@@ -115,39 +114,40 @@ console.error("هناك شئ غير صحيح");
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-4 mt-4"
           >
-
-<FormField
-  control={form.control}
-  name="type"
-  render={({ field }) => (
-    <FormItem>
-      <FormControl>
-        <div>
-          <label>
-            <input
-              type="radio"
-              value="exam"
-              checked={field.value === "exam"}
-              onChange={field.onChange}
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <div className="flex items-center gap-2">
+                      <label className="flex items-center gap-2 border p-2 rounded-lg cursor-pointer" htmlFor="exam_option">
+                        <input
+                          type="radio"
+                          value="exam"
+                          checked={field.value === "exam"}
+                          onChange={field.onChange}
+                          id="exam_option"
+                        />
+                        المقياس
+                      </label>
+                      <label className="flex items-center gap-2 border p-2 rounded-lg cursor-pointer" htmlFor="form_option">
+                        <input
+                          type="radio"
+                          value="form"
+                          checked={field.value === "form"}
+                          onChange={field.onChange}
+                          id="form_option"
+                        />
+                        الاختبار
+                      </label>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            المقياس 
-          </label>
-          <label>
-            <input
-              type="radio"
-              value="form"
-              checked={field.value === "form"}
-              onChange={field.onChange}
-            />
-            الاختبار
-          </label>
-        </div>
-      </FormControl>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
-            <Label>-:عنوان</Label>
+            <Label>عنوان:</Label>
             <FormField
               control={form.control}
               name="title"
@@ -164,7 +164,7 @@ console.error("هناك شئ غير صحيح");
                 </FormItem>
               )}
             />
-            <Label className="mt-2">وصف:-</Label>
+            <Label className="mt-2">وصف:</Label>
             <FormField
               control={form.control}
               name="description"
@@ -223,9 +223,7 @@ console.error("هناك شئ غير صحيح");
                 "flex justify-between items-center py-3 pl-3 gap-x-2 bg-slate-200 border-slate-200 border text-slate-700 rounded-md mb-4 text-sm"
               )}
             >
-              <div>
-                {item.type === "exam" ? item.title : item.url}
-              </div>
+              <div>{item.type === "exam" ? item.title : item.url}</div>
               <div className="ml-auto pr-2 flex items-center gap-x-2">
                 <Badge
                   className={cn(

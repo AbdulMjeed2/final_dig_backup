@@ -22,6 +22,13 @@ export async function POST(
         course: true,
       },
     });
+    
+    const body = await req.json();
+    const nameOfStudent = body.nameOfStudent;
+
+    if (!nameOfStudent) {
+      return new NextResponse("Name of student is required", { status: 400 });
+    }
 
     if (!exam) {
       return new NextResponse("Unauthorized", { status: 503 });
@@ -31,7 +38,8 @@ export async function POST(
       data: {
         examId: params.examId,
         courseTitle: exam.course.title,
-        userId: userId
+        userId: userId,
+        nameOfStudent: nameOfStudent,
       },
     });
     console.log("line 37", certificate)

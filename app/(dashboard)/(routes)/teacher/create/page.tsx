@@ -31,7 +31,7 @@ const CreatePage = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: ""
+      title: "",
     },
   });
 
@@ -44,19 +44,16 @@ const CreatePage = () => {
       toast.success("تم إنشاء الدورة");
     } catch {
       //toast.error("هناك شئ غير صحيح");
-console.error("هناك شئ غير صحيح");
+      console.error("هناك شئ غير صحيح");
     }
-  }
+  };
 
-  return ( 
+  return (
     <div className="max-w-5xl mx-auto flex md:items-center md:justify-center h-full div-6">
       <div>
-        <h1 className="text-2xl">
-          قم بتسمية الدورة التدريبية الخاصة بك
-        </h1>
+        <h1 className="text-2xl">قم بتسمية الدورة التدريبية الخاصة بك</h1>
         <div className="text-sm text-slate-600">
-        ماذا تريد أن تسمي الدورة الخاصة بك؟ لا تقلق 
-        .يمكنك تغيير هذا لاحقا
+          ماذا تريد أن تسمي الدورة الخاصة بك؟ لا تقلق .يمكنك تغيير هذا لاحقا
         </div>
         <Form {...form}>
           <form
@@ -68,9 +65,7 @@ console.error("هناك شئ غير صحيح");
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                  عنوان الدورة
-                  </FormLabel>
+                  <FormLabel>عنوان الدورة</FormLabel>
                   <FormControl>
                     <Input
                       disabled={isSubmitting}
@@ -78,26 +73,18 @@ console.error("هناك شئ غير صحيح");
                       {...field}
                     />
                   </FormControl>
-                  <FormDescription>
-                  ماذا ستدرس في هذه الدورة؟
-                  </FormDescription>
+                  <FormDescription>ماذا ستدرس في هذه الدورة؟</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <div className="flex items-center gap-x-2">
               <Link href="/">
-                <Button
-                  type="button"
-                  variant="ghost"
-                >
+                <Button type="button" variant="ghost">
                   الغاء
                 </Button>
               </Link>
-              <Button
-                type="submit"
-                disabled={!isValid || isSubmitting}
-              >
+              <Button type="submit" disabled={!isValid || isSubmitting}>
                 إنشاء
               </Button>
             </div>
@@ -105,7 +92,7 @@ console.error("هناك شئ غير صحيح");
         </Form>
       </div>
     </div>
-   );
-}
- 
+  );
+};
+
 export default CreatePage;

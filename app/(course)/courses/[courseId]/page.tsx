@@ -62,7 +62,6 @@ const CourseIdPage = async ({ params }: { params: { courseId: string } }) => {
       lessonId: StartExam?.id,
       userId: userId
     },
-
   });
   if (StartExam) {
     if (StartExam.isPublished) {
@@ -93,7 +92,7 @@ const CourseIdPage = async ({ params }: { params: { courseId: string } }) => {
       const lesson = chapter.lessons[j];
       const progress = await db.userProgress.findFirst({ where: { lessonId: lesson.id, userId: userId } })
       if (progress?.isCompleted) {
-
+        
       }
       else {
         currentLesson = lesson

@@ -16,7 +16,7 @@ import fontkit from "@pdf-lib/fontkit";
 import "react-pdf/dist/Page/TextLayer.css";
 import dynamic from "next/dynamic";
 
-const Component = dynamic(() => import("./PDFViewer"));
+const Component = dynamic(() => import("./PDFViewer")); 
 
 const CertificatePage = ({
   params,

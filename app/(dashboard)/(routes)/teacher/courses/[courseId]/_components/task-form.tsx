@@ -121,7 +121,7 @@ console.error("هناك شئ غير صحيح");
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-4 mt-4"
           >
-            <Label>-:عنوان</Label>
+            <Label>:عنوان</Label>
             <FormField
               control={form.control}
               name="title"

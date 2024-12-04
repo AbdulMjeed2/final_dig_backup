@@ -48,10 +48,10 @@ const CourseIdPage = async ({ params }: { params: { courseId: string } }) => {
     },
   });
   const task = await db.task.findFirst({
-    where:{
-      courseId: params.courseId
-    }
-  })
+    where: {
+      courseId: params.courseId,
+    },
+  });
   const categories = await db.category.findMany({
     orderBy: {
       name: "asc",
@@ -85,7 +85,7 @@ const CourseIdPage = async ({ params }: { params: { courseId: string } }) => {
           <div className="flex flex-col gap-y-2">
             <h1 className="text-2xl font-medium">إعداد الدورة</h1>
             <span className="text-sm text-slate-700">
-            أكمل كافة الحقول {completionText}
+              أكمل كافة الحقول {completionText}
             </span>
           </div>
           <Actions
@@ -119,25 +119,25 @@ const CourseIdPage = async ({ params }: { params: { courseId: string } }) => {
               </div>
               <ChaptersForm initialData={course} courseId={course.id} />
             </div>
-            
+
             <div>
               <div className="flex items-center gap-x-2">
                 <IconBadge icon={ShieldQuestion} />
-                <h2 className="text-xl">الاختبار القبلي  </h2>
+                <h2 className="text-xl">الاختبار القبلي </h2>
               </div>
               <StarterExamForm initialData={course} courseId={course.id} />
             </div>
             <div>
               <div className="flex items-center gap-x-2">
                 <IconBadge icon={ShieldQuestion} />
-                <h2 className="text-xl">الاختبار البعدي  </h2>
+                <h2 className="text-xl">الاختبار البعدي</h2>
               </div>
               <ExamForm initialData={course} courseId={course.id} />
             </div>
             <div>
               <div className="flex items-center gap-x-2">
                 <IconBadge icon={ClipboardListIcon} />
-                <h2 className="text-xl"> المهام  </h2>
+                <h2 className="text-xl"> المهام </h2>
               </div>
               <TaskForm initialData={task} courseId={course.id} />
             </div>

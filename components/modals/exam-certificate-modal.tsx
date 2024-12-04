@@ -1,120 +1,126 @@
 "use client";
-
-import * as z from "zod";
 import axios from "axios";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useState, useMemo, useEffect } from "react";
+import { useUser } from "@clerk/nextjs";
 
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
-  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "../ui/form";
-import { Input } from "../ui/input";
 import { Button } from "../ui/button";
+import { useConfettiStore } from "@/hooks/use-confetti-store";
 
 interface PrepareCertificateModalProps {
   children: React.ReactNode;
   courseId: string;
   examId: string;
-  certificateId: string;
 }
 
 export const PrepareCertificateModal = ({
   children,
   courseId,
   examId,
-  certificateId,
 }: PrepareCertificateModalProps) => {
-  const formSchema = z.object({
-    nameOfStudent: z.string().min(1),
-  });
-
   const router = useRouter();
+  const { user } = useUser();
+  const userFullName = useMemo(() => {
+    return `${user?.firstName} ${user?.lastName || ""}`.trim();
+  }, [user?.firstName, user?.lastName]);
+  const confetti = useConfettiStore();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [certificate, setCertificate] = useState<any>(null);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      nameOfStudent: "",
-    },
-  });
+  // Check if the user already has a certificate
+  useEffect(() => {
+    const checkCertificate = async () => {
+      try {
+        const response = await axios.get(
+          `/api/courses/${courseId}/exam/${examId}/certificate`
+        );
+        if (response.status === 200 && response.data) {
+          setCertificate(response.data); // Certificate exists
+        }
+      } catch (error) {
+        console.error("Error fetching certificate:", error);
+      }
+    };
+    checkCertificate();
+  }, [courseId, examId]);
 
-  const { isSubmitting, isValid } = form.formState;
-
-  const onSubmit = async (value: z.infer<typeof formSchema>) => {
+  const requestCertificate = async () => {
     try {
-      router.refresh()
+      setIsSubmitting(true);
 
-      await axios.patch(
-        `/api/courses/${courseId}/exam/${examId}/certificate/${certificateId}`,
-        value
+      // Request to generate the certificate
+      const certificateResponse = await axios.post(
+        `/api/courses/${courseId}/exam/${examId}/certificate`,
+        {
+          nameOfStudent: userFullName,
+        }
       );
-      toast.success("تم تحديث شهادتك  ");
-      router.push(
-        `/courses/${courseId}/exam/${examId}/certificate/${certificateId}`
-      );
+
+      if (certificateResponse.status === 200) {
+        if (certificateResponse.data.id) {
+          toast.success("شهادتك جاهزة!");
+          await axios.patch(
+            `/api/courses/${courseId}/exam/${examId}/certificate/${certificateResponse.data.id}`,
+            {
+              nameOfStudent: userFullName,
+            }
+          );
+          confetti.onOpen();
+          setTimeout(() => {
+            router.push(
+              `/courses/${courseId}/exam/${examId}/certificate/${certificateResponse.data.id}`
+            );
+          }, 500);
+        } else {
+          setIsSubmitting(false);
+          toast.error("الشهادة غير جاهزة، حاول مرة أخرى");
+        }
+      } else {
+        setIsSubmitting(false);
+        toast.error("لا يمكن إنشاء شهادة في هذا الوقت، آسف!");
+      }
     } catch {
-      //toast.error("هناك شئ غير صحيح");
-console.error("هناك شئ غير صحيح");
+      setIsSubmitting(false);
+      toast.error("هناك شئ غير صحيح");
     }
   };
+
   return (
-    <AlertDialog >
-      <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        {children}
+      </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>احصل على شهادتك</AlertDialogTitle>
-          <AlertDialogDescription>
-          املأ الاسم الذي تريده على شهادتك
+          <AlertDialogTitle className="text-right">
+            احصل على شهادتك
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-right">
+            تأكيد طلب إصدار الشهادة الخاصة بك
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4 mt-4"
-          >
-            <FormField
-              control={form.control}
-              name="nameOfStudent"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      disabled={isSubmitting}
-                      placeholder="أدخل اسمك الكامل"
-                      dir="rtl"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex items-center gap-x-2" dir="rtl">
-              <Button disabled={!isValid || isSubmitting} type="submit">
-                حفظ
-              </Button>
-            </div>
-          </form>
-        </Form>
-        <AlertDialogFooter>
+        <div className="flex items-center gap-x-2" dir="rtl">
+          {certificate ? (
+            <Button disabled={true} className="bg-gray-500">
+              لديك شهادة بالفعل
+            </Button>
+          ) : (
+            <Button onClick={requestCertificate} disabled={isSubmitting}>
+              {isSubmitting ? "جاري الطلب..." : "تأكيد"}
+            </Button>
+          )}
           <AlertDialogCancel>إلغاء</AlertDialogCancel>
-        </AlertDialogFooter>
+        </div>
       </AlertDialogContent>
     </AlertDialog>
   );

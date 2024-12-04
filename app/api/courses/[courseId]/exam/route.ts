@@ -32,7 +32,7 @@ export async function POST(
         description,
         courseId: params.courseId,
         userId,
-        starterExam: starter ? true : false
+        starterExam: starter ? true : false,
       },
     });
     const course = await db.course.findUnique({

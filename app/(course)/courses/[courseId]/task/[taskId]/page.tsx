@@ -14,12 +14,10 @@ import { isTeacher } from "@/lib/teacher";
 import TaskTeacherFiles from "./_components/task-files-teacher";
 import { TaskCompeleteButton } from "./_components/task-complete-button";
 
-
-
 const LessonIdPage = async ({
   params,
 }: {
-  params: { courseId: string; taskId: string; };
+  params: { courseId: string; taskId: string };
 }) => {
   const { userId } = auth();
 
@@ -27,47 +25,57 @@ const LessonIdPage = async ({
     return redirect("/");
   }
 
-  const task = await db.task.findUnique({where:{id:params.taskId}})
+  const task = await db.task.findUnique({ where: { id: params.taskId } });
   const attachmentTask = await db.taskAttachment.findFirst({
-    where:{
-      taskId:params.taskId,
-      userId: userId
-    }
-  })
+    where: {
+      taskId: params.taskId,
+      userId: userId,
+    },
+  });
   if (!task) {
     return redirect("/");
   }
-  const taskProgress = await db.userProgress.findFirst({where: {lessonId : params.taskId, userId:userId}})
-  const completeOnEnd = taskProgress?.isCompleted
-  console.log(taskProgress)
-  const startedAt = Date.now()
+  const taskProgress = await db.userProgress.findFirst({
+    where: { lessonId: params.taskId, userId: userId },
+  });
+  const completeOnEnd = taskProgress?.isCompleted;
+  console.log(taskProgress);
+  const startedAt = Date.now();
   return (
     <div>
       {completeOnEnd && (
         <Banner variant="success" label=".لقد أكملت هذه المهمة بالفعل" />
       )}
       <div className="flex flex-col max-w-4xl mx-auto pb-20 pt-10" dir="rtl">
-      <div className="flex ">
-              
-        </div>
+        <div className="flex "></div>
         <div className="p-4 flex flex-col md:flex-row items-center justify-between">
-              <h2 className="text-2xl font-semibold">{task?.title}</h2>
-              <TaskCompeleteButton taskId={task.id} isCompleted={taskProgress?.isCompleted} courseId={params.courseId}/>
-          </div>
-        <div className="space-y-4">
-          
-          <Separator />
-          
-            <div dir="rtl">
-              <TaskForm defaultContext={task?.content!} />
-            </div>
-              
-           {
-            isTeacher(userId) ? (<TaskTeacherFiles taskId={params.taskId} courseId={params.courseId}/>) : (<TaskFileForm taskId={params.taskId} courseId={params.courseId} attachment={attachmentTask!}/>)
-           }
-            
+          <h2 className="text-2xl font-semibold w-full text-right md:max-w-[75%]">{task?.title}</h2>
+          <TaskCompeleteButton
+            taskId={task.id}
+            isCompleted={taskProgress?.isCompleted}
+            courseId={params.courseId}
+          />
         </div>
-        
+        <div className="space-y-4">
+          <Separator />
+
+          <div dir="rtl">
+            <TaskForm defaultContext={task?.content!} />
+          </div>
+
+          {isTeacher(userId) ? (
+            <TaskTeacherFiles
+              taskId={params.taskId}
+              courseId={params.courseId}
+            />
+          ) : (
+            <TaskFileForm
+              taskId={params.taskId}
+              courseId={params.courseId}
+              attachment={attachmentTask!}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

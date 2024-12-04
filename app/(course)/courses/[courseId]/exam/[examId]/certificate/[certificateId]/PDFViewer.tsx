@@ -39,8 +39,9 @@ export const PdfViewer = ({
       const firstPage = pages[0];
 
       try {
+        console.log('drawing your certificate')
         const response = await axios.get(
-          `/api/courses/${params.courseId}/exam//${params.examId}/certificate/${params.certificateId}`
+          `/api/courses/${params.courseId}/exam/${params.examId}/certificate/${params.certificateId}`
         );
         const fontUrl =
           "https://uz635cwohid0t4ce.public.blob.vercel-storage.com/Cairo-Regular-IfPEScEah1exU4X87UiQ3sPhWk8hQ6.ttf";
@@ -49,6 +50,7 @@ export const PdfViewer = ({
         const customFont = await pdfDoc.embedFont(fontBytes);
         const textSize = 35;
         const date = new Date(response.data.dateOfIssuance);
+        console.log('response.data', response.data)
         firstPage.drawText(response.data.nameOfStudent, {
           x: 400,
           y: 285,
@@ -89,8 +91,8 @@ export const PdfViewer = ({
         }
         return router.refresh();
       } catch (error) {
-        //toast.error("هناك شئ غير صحيح");
-console.error("هناك شئ غير صحيح");
+        console.error("Error getting certificate", error as any);
+        toast.error("هناك شئ غير صحيح");
       } finally {
         setisGettingCertificate(false);
       }
@@ -100,24 +102,25 @@ console.error("هناك شئ غير صحيح");
   if (!userId) {
     return redirect("/");
   }
-
   const handleDownload = async () => {
-    if (!htmlRef.current) {
-      toast.error("لا المرجع");
+    if (!certificatePdf) {
+      toast.error("لم يتم العثور على ملف PDF للتحميل");
       return;
     }
-
+  
     try {
-      const pdfBlob = await htmlToPdf(htmlRef.current);
-      const url = URL.createObjectURL(pdfBlob as Blob);
       const link = document.createElement("a");
-      link.href = url;
+      link.href = certificatePdf;
       link.setAttribute("download", "certificate.pdf");
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
     } catch (error) {
-      console.error(error);
+      console.error("Error during download", error);
+      toast.error("حدث خطأ أثناء تحميل الشهادة");
     }
   };
+  
 
   return (
     <>

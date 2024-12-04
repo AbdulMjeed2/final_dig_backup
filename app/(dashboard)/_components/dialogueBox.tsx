@@ -13,11 +13,12 @@ export const DialogBox = ({ page }: { page?: string }) => {
   const [popup, setPopup] = useState<boolean>(false);
   const [showAgain, setShowAgain] = useState(false);
   const { user } = useUser();
+  console.log(user)
 
   const getStatus = useCallback(async () => {
     try {
       const { data } = await axios.get(`/api/dialog`);
-      setPopup(data && data[page!] !== undefined ? !data[page!] : true);
+      setPopup(true);
     } catch (e) {
       console.error("Error fetching dialog status:", e);
       setPopup(true);
@@ -106,12 +107,12 @@ export const DialogBox = ({ page }: { page?: string }) => {
                   </button>
                 </div>
 
-                <div className="px-4  md:px-5 space-y-4">
+                <div className="px-4 py-5 md:px-5 space-y-4">
                   <p
                     className="text-base leading-relaxed text-gray-700 dark:text-gray-400"
                     dir="rtl"
                   >
-                    مرحبا بك {userFullName}
+                    مرحبا {userFullName} في موقع (digital-art) نتمنى لك المتعة والفائدة مثل هذه (موجودة في الموقع)
                   </p>
                   <p className="text-base leading-relaxed text-gray-700 dark:text-gray-400">
                     {data[page!]}
@@ -120,13 +121,13 @@ export const DialogBox = ({ page }: { page?: string }) => {
                     هل تحتاج المزيد من التوضيح؟
                   </p>
                 </div>
-                <div className="flex px-4 md:px-5 gap-4">
+                {/* <div className="flex px-4 md:px-5 gap-4">
                   <input
                     type="checkbox"
                     onChange={(e) => setShowAgain(e.target.checked)}
                   />
                   <p> الرجاء عدم اظهار الرسالة مرة أخرى</p>
-                </div>
+                </div> */}
                 <div className="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
                   <button
                     onClick={(e) => handleClick(true)}

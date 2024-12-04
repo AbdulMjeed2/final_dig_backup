@@ -26,62 +26,59 @@ const LessonIdPage = async ({
     return redirect("/");
   }
 
-  const {
-    lesson,
-    chapter,
-    course,
-    attachments,
-    userProgress,
-  } = await getChapter({
-    userId,
-    chapterId: params.chapterId,
-    courseId: params.courseId,
-    lessonId: params.lessonId,
-  });
+  const { lesson, chapter, course, attachments, userProgress } =
+    await getChapter({
+      userId,
+      chapterId: params.chapterId,
+      courseId: params.courseId,
+      lessonId: params.lessonId,
+    });
 
   if (!chapter || !course || !lesson) {
     return redirect("/");
   }
-  const isInroductionCourse = process.env.NEXT_PUBLIC_INTRODUTION_COURSE_ID === course.id
+  const isInroductionCourse =
+    process.env.NEXT_PUBLIC_INTRODUTION_COURSE_ID === course.id;
   const completeOnEnd = !userProgress?.isCompleted;
-  const startedAt = Date.now()
+  const startedAt = Date.now();
   return (
     <div>
-      <HelpBox  />
+      <HelpBox />
       {userProgress?.isCompleted && (
         <Banner variant="success" label=".لقد أكملت هذا الدرس بالفعل" />
       )}
 
       <div className="flex flex-col max-w-4xl mx-auto pb-20 pt-10" dir="rtl">
-      <div className="flex ">
-              
-        </div>
+        <div className="flex "></div>
         <div className="p-4 flex flex-col md:flex-row items-center justify-between">
-              <h2 className="text-2xl font-semibold">{lesson.title}</h2>
-            {
-              isInroductionCourse ?  isTeacher(userId) ?  <CourseEditButton chapterId={params.chapterId} lessonId={params.lessonId} /> : "" : (
-                <CourseProgressButton
-                  lessonId={params.lessonId}
-                  chapterId={params.chapterId}
-                  courseId={params.courseId}
-                  isCompleted={!!userProgress?.isCompleted}
-                  userId={userId}
-                  startedAt={startedAt}
-                />
-
-              ) 
-            }
-          </div>
+          <h2 className="text-2xl font-semibold w-full text-right md:max-w-[75%] mb-5 md:mb-0">{lesson.title}</h2>
+          {isInroductionCourse ? (
+            isTeacher(userId) ? (
+              <CourseEditButton
+                chapterId={params.chapterId}
+                lessonId={params.lessonId}
+              />
+            ) : (
+              ""
+            )
+          ) : (
+            <CourseProgressButton
+              lessonId={params.lessonId}
+              chapterId={params.chapterId}
+              courseId={params.courseId}
+              isCompleted={!!userProgress?.isCompleted}
+              userId={userId}
+              startedAt={startedAt}
+            />
+          )}
+        </div>
         <div className="space-y-4">
-          
           <Separator />
-          
-            <div dir="rtl">
-              <CourseForm defaultContext={lesson.description!} />
-            </div>
-              
-            
-          
+
+          <div dir="rtl">
+            <CourseForm defaultContext={lesson.description!} />
+          </div>
+
           {!!attachments.length && (
             <>
               <Separator />

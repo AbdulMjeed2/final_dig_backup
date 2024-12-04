@@ -187,12 +187,11 @@ const ExamIdPage = ({
         );
       }
 
-      // console.log("====================================");
-      // console.log(response.data);
-      // console.log("====================================");
+      console.log("====================================");
+      console.log(response.data);
+      console.log("====================================");
     } catch (error) {
       console.error("Error submitting exam:", error);
-      //toast.error("هناك شئ غير صحيح");
       console.error("هناك شئ غير صحيح");
     } finally {
       setIsSubmitting(false);
@@ -233,15 +232,16 @@ const ExamIdPage = ({
       return router.push(`/courses/${course?.id}`);
     }, 1000);
   };
-  // To enable if we need the countdown (Not sure if we need to keep it.)
-  // Disabled it as the component keeps re-rendering and the countdown
-  // useEffect(() => {
-  //   // Start the countdown timer when the component mounts
-  //   const timerId = setInterval(countdown, 1000);
+  /**
+   * Disable the countdown to avoid multirendering
+   */
+  //   useEffect(() => {
+  //     // Start the countdown timer when the component mounts
+  //     const timerId = setInterval(countdown, 1000);
 
-  //   // Clear the interval when the component unmounts
-  //   return () => clearInterval(timerId);
-  // }, []);
+  //     // Clear the interval when the component unmounts
+  //     return () => clearInterval(timerId);
+  //   }, []);
 
   // useEffect(() => {
   //   if (
@@ -288,11 +288,11 @@ const ExamIdPage = ({
   useEffect(() => {
     if (answeredQuestions === exam?.questions.length) {
       setCanSubmit(true);
-      // console.log("ss");
+      console.log("ss");
     }
   }, [answeredQuestions, exam?.questions.length]);
   useEffect(() => {
-    // console.log(exam);
+    console.log(exam);
     if (exam?.starterExam) {
       setFirstExam(true);
     } else {
@@ -303,28 +303,23 @@ const ExamIdPage = ({
     (async () => {
       try {
         const response = await axios.get(`/api/courses/${params.courseId}`);
-        const fetchedExam = response.data.exams.filter((e: any) => e.id === params.examId)[0];
-    
-        // Shuffle the questions directly
-        fetchedExam.questions = [...fetchedExam.questions].sort(() => Math.random() - 0.5);
-    
-        // Set the shuffled exam
-        setExam(fetchedExam);
+        setExam(
+          response.data.exams.filter((e: any) => e.id == params.examId)[0]
+        );
 
-        // console.log("====================================");
-        // console.log(response.data);
-        // console.log("====================================");
+        console.log("====================================");
+        console.log(response.data);
+        console.log("====================================");
 
         setCourse(response.data);
 
-        // console.log("====================================");
-        // console.log(response.data.exams.certificate);
-        // console.log("====================================");
+        console.log("====================================");
+        console.log(response.data.exams.certificate);
+        console.log("====================================");
       } catch (error) {
-        console.error("====================================");
-        console.error(error);
-        console.error("====================================");
-        //toast.error("هناك شئ غير صحيح");
+        console.log("====================================");
+        console.log(error);
+        console.log("====================================");
         console.error("هناك شئ غير صحيح");
       }
     })();
@@ -362,13 +357,10 @@ const ExamIdPage = ({
                 </h1>
               </div>
               <div className="flex flex-col space-y-4 ">
-                <p>مجموع الأسئلة: {exam?.questions.length}</p>
+                <p>مجموع الاسئلة: {exam?.questions.length}</p>
                 <p>عدد الأسئلة الصحيحة: {correctAnswers}</p>
                 <p>عدد الأسئلة الخاطئة: {wrongAnswers}</p>
-                <p>
-                  النسبة المئوية: {scorePercentage.toFixed(1)}
-                  {"%"}{" "}
-                </p>
+                <p>النسبة المئوية: % {scorePercentage.toFixed(1)} </p>
               </div>
               <button
                 type="button"
@@ -381,10 +373,7 @@ const ExamIdPage = ({
               </button>
             </div>
           ) : scorePercentage > 60 ? (
-            <div
-              dir="rtl"
-              className="w-full p-20 flex h-full flex-col  gap-4   "
-            >
+            <div dir="rtl" className="w-full p-20 flex h-full flex-col  gap-4">
               <div className="flex flex-col space-x-4 ">
                 <h1 className="text-lg md:text-xl font-medium capitalize">
                   {" "}
@@ -392,14 +381,10 @@ const ExamIdPage = ({
                 </h1>
               </div>
               <div className="flex flex-col space-y-4 ">
-                <p>مجموع الأسئلة: {exam?.questions.length}</p>
+                <p>مجموع الاسئلة: {exam?.questions.length}</p>
                 <p>عدد الأسئلة الصحيحة: {correctAnswers}</p>
                 <p>عدد الأسئلة الخاطئة: {wrongAnswers}</p>
-                <p>
-                  {" "}
-                  النسبة المئوية: {scorePercentage.toFixed(1)}
-                  {"%"}
-                </p>
+                <p> النسبة المئوية: %{scorePercentage.toFixed(1)}</p>
               </div>
               <div>
                 <PrepareCertificateModal
@@ -429,13 +414,10 @@ const ExamIdPage = ({
                 </h1>
               </div>
               <div className="flex flex-col space-y-4 ">
-                <p>مجموع الأسئلة: {exam?.questions.length}</p>
+                <p>مجموع الاسئلة: {exam?.questions.length}</p>
                 <p>عدد الأسئلة الصحيحة: {correctAnswers}</p>
                 <p>عدد الأسئلة الخاطئة: {wrongAnswers}</p>
-                <p>
-                  النسبة المئوية: {scorePercentage.toFixed(1)}
-                  {"%"}
-                </p>
+                <p>النسبة المئوية:% {scorePercentage.toFixed(1)}</p>
               </div>
               <button
                 type="button"
@@ -450,14 +432,14 @@ const ExamIdPage = ({
           )
         ) : (
           <>
-            <div className="pb-10 flex flex-col px-10 gap-4 py-4">
+            <div className="my-10 flex flex-col px-10 gap-4 py-4">
               {hasSubmitted ? (
                 <Banner
                   variant={"success"}
                   label={`الأسئلة التي تمت الإجابة عليها: ${answeredQuestions}    |    الإجابات الصحيحة: ${correctAnswers}    |    إجابات خاطئة: ${wrongAnswers} `}
                 />
               ) : (
-                <div className="w-full flex flex-col gap-4 justify-center items-end h-12">
+                <div className="w-full flex flex-col gap-4 justify-center items-end">
                   <div className="flex space-x-4 items-center">
                     <h1 className="text-lg md:text-xl font-medium capitalize">
                       مجموع الأسئلة {exam?.questions.length}
@@ -473,33 +455,37 @@ const ExamIdPage = ({
                       {course?.title}
                     </h1>
                   </div>
-                  {isFirstExam && (
-                    <div className="flex space-x-3 ">
-                      <div className="text-md">
+                  {isFirstExam ? (
+                    <div className="flex flex-col gap-5 w-full space-x-3 ">
+                      <div className="text-md ml-auto text-right">
                         {" "}
                         <FroalaEditorView model={exam.description} />
                       </div>
+                      <FormButton2
+                        url={exam.url ? exam.url : "#"}
+                        text="المقياس القبلي"
+                        passedText="تم إكمال النموذج"
+                      />
                     </div>
+                  ) : (
+                    <FormButton2
+                      url={exam.url ? exam.url : "#"}
+                      text="المقياس البعدي"
+                      passedText="تم إكمال النموذج"
+                    />
                   )}
                 </div>
               )}
 
               <div className="flex flex-col items-center relative">
                 {exam?.questions
-                  // Here i removed the order by position (So we can shuffle)
-                  // .sort((a, b) =>
-                  //   a.position > b.position
-                  //     ? 1
-                  //     : b.position > a.position
-                  //     ? -1
-                  //     : 0
-                  // )
+                  .sort((a, b) => a.position - b.position)
                   .map((question, index) => (
                     <CarouselItem key={index} className="w-full mb-4">
                       <div className="bg-sky-100 border border-slate-200 rounded-lg p-4 max-w-full ">
                         <div className="w-full flex h-fit flex-col items-end">
                           <div className="font-medium text-slate-500 mb-4 text-right">
-                            سؤال {index + 1}
+                            سؤال {question.position}
                           </div>
                           <div
                             className="text-slate-700 mb-4 font-bold text-lg"
@@ -534,7 +520,7 @@ const ExamIdPage = ({
                                           className="capitalize text-sm"
                                           dir="rtl"
                                         >
-                                          {option.text}
+                                          {option.text} {option.position}
                                         </label>
                                         <input
                                           className="mr-2"
@@ -559,10 +545,11 @@ const ExamIdPage = ({
                                           name={question.id}
                                           value={index + 1}
                                           disabled={disableSelect}
-                                          checked={
-                                            userSelections[question.id] ==
-                                            index + 1
-                                          }
+                                          // This is if you want to cheat haha
+                                          // defaultChecked={
+                                          //   option.position ===
+                                          //   Number(question.answer)
+                                          // }
                                           onChange={() =>
                                             handleOptionChange(
                                               question.id,
@@ -641,7 +628,6 @@ const ExamIdPage = ({
                 </div>
               </div>
             </div>
-            <FormButton2 />
           </>
         )
       ) : (

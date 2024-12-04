@@ -4,19 +4,29 @@ import { useState, useEffect } from "react";
 import { PlayCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export const FormButton2 = () => {
+export const FormButton2 = ({
+  text,
+  url,
+  passedText,
+}: {
+  text: string;
+  url: string;
+  passedText: string;
+}) => {
+  // Need backend working to get the correct URL to the forms.
+
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
-  // Check local storage on component mount
   useEffect(() => {
-    const formSubmitted = localStorage.getItem("formSubmitted");
-    setHasSubmitted(formSubmitted === "true");
+    if (localStorage.getItem("formSubmitted")) {
+      setHasSubmitted(true);
+    }
   }, []);
 
   const handleClick = () => {
     if (!hasSubmitted) {
-      window.open("https://forms.google.com/your-form-url", "_blank");
-      localStorage.setItem("formSubmitted", "true"); // Mark as submitted
+      window.open(url, "_blank");
+      localStorage.setItem("formSubmitted", "true");
       setHasSubmitted(true);
     }
   };
@@ -25,7 +35,7 @@ export const FormButton2 = () => {
     <button
       onClick={handleClick}
       type="button"
-      disabled={hasSubmitted} // Disable the button if already submitted
+      disabled={hasSubmitted}
       className={cn(
         "flex items-center justify-end w-full gap-x-2 text-sm font-[500] transition-all px-3 py-2 border-r-4",
         hasSubmitted
@@ -37,12 +47,14 @@ export const FormButton2 = () => {
         <PlayCircle
           size={18}
           className={cn(
-            "flex-shrink-0",
-            hasSubmitted ? "text-gray-400" : "text-green-500 hover:text-green-700"
+            "flex-shrink-0 rounded-md",
+            hasSubmitted
+              ? "text-gray-400"
+              : "text-green-500 hover:text-green-700"
           )}
         />
         <div className="text-sm">
-          {hasSubmitted ? "Form Submitted" : "Form"}
+          {hasSubmitted ? passedText : text}
         </div>
       </div>
     </button>
