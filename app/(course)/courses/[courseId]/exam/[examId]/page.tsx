@@ -463,6 +463,7 @@ const ExamIdPage = ({
                       </div>
                       <FormButton2
                         url={"#"}
+                        // url={exam.url ? exam.url : "#"}
                         text="المقياس القبلي"
                         passedText="تم إكمال النموذج"
                       />
@@ -470,6 +471,7 @@ const ExamIdPage = ({
                   ) : (
                     <FormButton2
                       url={"#"}
+                      // url={exam.url ? exam.url : "#"}
                       text="المقياس البعدي"
                       passedText="تم إكمال النموذج"
                     />
