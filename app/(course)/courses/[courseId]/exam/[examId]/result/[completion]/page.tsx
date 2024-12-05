@@ -144,7 +144,7 @@ const ExamPassedResults = ({
             <PrepareCertificateModal
               courseId={params.courseId}
               examId={params.examId}
-              certificateId={certificateId}
+              // certificateId={certificateId}
             >
               <Button
                 size="sm"
