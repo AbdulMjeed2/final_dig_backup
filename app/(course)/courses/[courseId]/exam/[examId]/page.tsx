@@ -462,14 +462,14 @@ const ExamIdPage = ({
                         <FroalaEditorView model={exam.description} />
                       </div>
                       <FormButton2
-                        url={exam.url ? exam.url : "#"}
+                        url={"#"}
                         text="المقياس القبلي"
                         passedText="تم إكمال النموذج"
                       />
                     </div>
                   ) : (
                     <FormButton2
-                      url={exam.url ? exam.url : "#"}
+                      url={"#"}
                       text="المقياس البعدي"
                       passedText="تم إكمال النموذج"
                     />
