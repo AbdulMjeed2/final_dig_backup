@@ -39,7 +39,7 @@ export const PdfViewer = ({
       const firstPage = pages[0];
 
       try {
-        console.log('drawing your certificate')
+        console.log("drawing your certificate");
         const response = await axios.get(
           `/api/courses/${params.courseId}/exam/${params.examId}/certificate/${params.certificateId}`
         );
@@ -50,21 +50,35 @@ export const PdfViewer = ({
         const customFont = await pdfDoc.embedFont(fontBytes);
         const textSize = 35;
         const date = new Date(response.data.dateOfIssuance);
-        console.log('response.data', response.data)
+        console.log("response.data", response.data);
+        const textWidth = customFont.widthOfTextAtSize(
+          response.data.nameOfStudent,
+          textSize
+        );
+        const pageWidth = firstPage.getWidth();
+        const centeredX = (pageWidth - textWidth) / 2;
         firstPage.drawText(response.data.nameOfStudent, {
-          x: 400,
+          x: centeredX,
           y: 285,
           size: textSize,
           font: customFont,
           color: rgb(0, 0.53, 0.71),
         });
+
+        // Calculate the text width for the course title
+        const courseTitleWidth = customFont.widthOfTextAtSize(
+          response.data.courseTitle,
+          textSize
+        );
+        const centeredCourseTitleX = (pageWidth - courseTitleWidth) / 2;
         firstPage.drawText(response.data.courseTitle, {
-          x: 400,
+          x: centeredCourseTitleX,
           y: 150,
           size: textSize,
           font: customFont,
           color: rgb(0, 0.53, 0.71),
         });
+
         firstPage.drawText(
           `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`,
           {
@@ -107,7 +121,7 @@ export const PdfViewer = ({
       toast.error("لم يتم العثور على ملف PDF للتحميل");
       return;
     }
-  
+
     try {
       const link = document.createElement("a");
       link.href = certificatePdf;
@@ -120,7 +134,6 @@ export const PdfViewer = ({
       toast.error("حدث خطأ أثناء تحميل الشهادة");
     }
   };
-  
 
   return (
     <>

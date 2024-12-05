@@ -244,6 +244,37 @@ const ExamIdPage = ({
     fetchData();
   }, [params.chapterId, params.courseId, userId]);
 
+  // New functionality to get the user's progress on the quiz
+  useEffect(() => {
+    async function get() {
+      const { data } = await axios.get(
+        `/api/courses/${params.courseId}/chapters/${params.chapterId}/quiz/${params.quizId}/progress`
+      );
+  
+      if (data) {
+        console.log(data);
+        const userSelections = JSON.parse(data.options);
+        setUserSelections(userSelections);
+        setDisableSelect(true);
+        sethasSubmitted(true);
+  
+        // Calculate wrongAnswersQuiz
+        const wrongAnswersQuizTemp: string[] = [];
+        quiz?.questions.forEach((question) => {
+          const questionId = question.id;
+          const userSelectedPosition = userSelections[question.id];
+          const correctAnswerPosition = parseInt(question.answer) - 1;
+          if (userSelectedPosition !== undefined && userSelectedPosition !== correctAnswerPosition) {
+            wrongAnswersQuizTemp.push(questionId);
+          }
+        });
+        setWrongAnswersQuiz(wrongAnswersQuizTemp);
+      }
+    }
+    get();
+  }, [params.courseId, params.chapterId, params.quizId, quiz]);
+
+  
   if (!userId) {
     return redirect("/");
   }
@@ -291,19 +322,22 @@ const ExamIdPage = ({
                       <div className="font-medium text-slate-500 mb-4 text-right">
                         سؤال {index + 1}
                       </div>
-
+            
                       <div
                         className="text-slate-700 font-bold text-lg mb-2"
                         dir="rtl"
                       >
                         <FroalaEditorView model={question.prompt} />
                       </div>
-
+            
                       <div className="flex flex-col items-end space-y-2 w-full mb-4">
                         {question.options
                           .sort((a, b) => a.position - b.position)
                           .map((option, optionIndex) => (
-                            <div key={option.id} className="w-full flex justify-end">
+                            <div
+                              key={option.id}
+                              className="w-full flex justify-end"
+                            >
                               {hasSubmitted ? (
                                 <div
                                   className={`flex w-[500px] max-w-full rounded-md p-2 transition-all space-x-2 justify-between ${
@@ -374,27 +408,24 @@ const ExamIdPage = ({
                               )}
                             </div>
                           ))}
-
+            
                         {/* Show explanation for wrong answers */}
-                        {hasSubmitted &&
-                          wrongAnswersQuiz.includes(question.id) && (
-                            <div
-                              className="mb-4 p-4 w-full flex flex-col gap-2 border border-black rounded-lg text-xs"
-                              dir="rtl"
-                            >
-                              <p className="text-right text-lg">
-                                تفسير الاجابة
-                              </p>
-                              {question.explanation ? (
-                                <FroalaEditorView
-                                  config={{ direction: "rtl" }}
-                                  model={question.explanation}
-                                />
-                              ) : (
-                                "لا يوجد تفسير"
-                              )}
-                            </div>
-                          )}
+                        {wrongAnswersQuiz.includes(question.id) && (
+                          <div
+                            className="mb-4 p-4 w-full flex flex-col gap-2 border border-black rounded-lg text-xs"
+                            dir="rtl"
+                          >
+                            <p className="text-right text-lg">تفسير الاجابة</p>
+                            {question.explanation ? (
+                              <FroalaEditorView
+                                config={{ direction: "rtl" }}
+                                model={question.explanation}
+                              />
+                            ) : (
+                              "لا يوجد تفسير"
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
