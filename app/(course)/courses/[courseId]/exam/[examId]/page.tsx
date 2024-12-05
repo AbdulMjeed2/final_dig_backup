@@ -482,7 +482,7 @@ const ExamIdPage = ({
                   .sort((a, b) => a.position - b.position)
                   .map((question, index) => (
                     <CarouselItem key={index} className="w-full mb-4">
-                      <div className="bg-sky-100 border border-slate-200 rounded-lg p-4 max-w-full">
+                      <div className="bg-sky-100 border border-slate-200 rounded-lg p-4 max-w-full ">
                         <div className="w-full flex h-fit flex-col items-end">
                           <div className="font-medium text-slate-500 mb-4 text-right">
                             سؤال {question.position}
@@ -612,7 +612,7 @@ const ExamIdPage = ({
                             <PrepareCertificateModal
                               courseId={params.courseId}
                               examId={params.examId}
-                              certificateId={certificateId}
+                              // certificateId={certificateId}
                             >
                               <Button
                                 size="sm"

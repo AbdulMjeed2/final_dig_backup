@@ -17,7 +17,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
 import { useConfettiStore } from "@/hooks/use-confetti-store";
 
-interface PrepareCertificateModalProps {
+interface PrepareCertificateModalProps { 
   children: React.ReactNode;
   courseId: string;
   examId: string;

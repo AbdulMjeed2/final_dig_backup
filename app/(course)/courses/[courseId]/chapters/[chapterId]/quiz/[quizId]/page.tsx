@@ -250,21 +250,24 @@ const ExamIdPage = ({
       const { data } = await axios.get(
         `/api/courses/${params.courseId}/chapters/${params.chapterId}/quiz/${params.quizId}/progress`
       );
-  
+
       if (data) {
         console.log(data);
         const userSelections = JSON.parse(data.options);
         setUserSelections(userSelections);
         setDisableSelect(true);
         sethasSubmitted(true);
-  
+
         // Calculate wrongAnswersQuiz
         const wrongAnswersQuizTemp: string[] = [];
         quiz?.questions.forEach((question) => {
           const questionId = question.id;
           const userSelectedPosition = userSelections[question.id];
           const correctAnswerPosition = parseInt(question.answer) - 1;
-          if (userSelectedPosition !== undefined && userSelectedPosition !== correctAnswerPosition) {
+          if (
+            userSelectedPosition !== undefined &&
+            userSelectedPosition !== correctAnswerPosition
+          ) {
             wrongAnswersQuizTemp.push(questionId);
           }
         });
@@ -274,7 +277,6 @@ const ExamIdPage = ({
     get();
   }, [params.courseId, params.chapterId, params.quizId, quiz]);
 
-  
   if (!userId) {
     return redirect("/");
   }
@@ -322,14 +324,14 @@ const ExamIdPage = ({
                       <div className="font-medium text-slate-500 mb-4 text-right">
                         سؤال {index + 1}
                       </div>
-            
+
                       <div
                         className="text-slate-700 font-bold text-lg mb-2"
                         dir="rtl"
                       >
                         <FroalaEditorView model={question.prompt} />
                       </div>
-            
+
                       <div className="flex flex-col items-end space-y-2 w-full mb-4">
                         {question.options
                           .sort((a, b) => a.position - b.position)
@@ -408,7 +410,7 @@ const ExamIdPage = ({
                               )}
                             </div>
                           ))}
-            
+
                         {/* Show explanation for wrong answers */}
                         {wrongAnswersQuiz.includes(question.id) && (
                           <div
