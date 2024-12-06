@@ -547,10 +547,10 @@ const ExamIdPage = ({
                                           value={index + 1}
                                           disabled={disableSelect}
                                           // This is if you want to cheat haha
-                                          defaultChecked={
-                                            option.position ===
-                                            Number(question.answer)
-                                          }
+                                          // defaultChecked={
+                                          //   option.position ===
+                                          //   Number(question.answer)
+                                          // }
                                           onChange={() =>
                                             handleOptionChange(
                                               question.id,
