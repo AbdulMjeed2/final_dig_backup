@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/lib/store";
 import { onOpen } from "@/lib/trigger";
-import { useRouter } from "next/navigation";
 import axios from "axios";
 import { data } from "@/lib/page";
 import { useUser } from "@clerk/nextjs";
@@ -18,6 +17,10 @@ export const DialogBox = ({ page }: { page?: string }) => {
   const getStatus = useCallback(async () => {
     try {
       const { data } = await axios.get(`/api/dialog`);
+      if (data && data[page!]) {
+        setPopup(false);
+        return;
+      }
       setPopup(true);
     } catch (e) {
       console.error("Error fetching dialog status:", e);
@@ -108,12 +111,12 @@ export const DialogBox = ({ page }: { page?: string }) => {
                 </div>
 
                 <div className="px-4 py-5 md:px-5 space-y-4">
-                  <p
+                  {/* <p
                     className="text-base leading-relaxed text-gray-700 dark:text-gray-400"
                     dir="rtl"
                   >
                     مرحبا {userFullName} في موقع (digital-art) نتمنى لك المتعة والفائدة مثل هذه (موجودة في الموقع)
-                  </p>
+                  </p> */}
                   <p className="text-base leading-relaxed text-gray-700 dark:text-gray-400">
                     {data[page!]}
                   </p>
@@ -121,13 +124,13 @@ export const DialogBox = ({ page }: { page?: string }) => {
                     هل تحتاج المزيد من التوضيح؟
                   </p>
                 </div>
-                {/* <div className="flex px-4 md:px-5 gap-4">
+                <div className="flex px-4 md:px-5 gap-4 pb-5">
                   <input
                     type="checkbox"
                     onChange={(e) => setShowAgain(e.target.checked)}
                   />
                   <p> الرجاء عدم اظهار الرسالة مرة أخرى</p>
-                </div> */}
+                </div>
                 <div className="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
                   <button
                     onClick={(e) => handleClick(true)}

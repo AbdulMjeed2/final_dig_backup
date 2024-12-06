@@ -79,6 +79,7 @@ const ExamIdPage = ({
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [wrongAnswers, setWrongAnswers] = useState(0);
   const [disableSelect, setDisableSelect] = useState(false);
+  const [alreadyPassed, setAlreadyPassed] = useState(false);
 
   const [scorePercentage, setScorePercentage] = useState(0);
   useEffect(() => {
@@ -141,42 +142,37 @@ const ExamIdPage = ({
   };
   const isPreTestRetakeAllowed =
     exam?.starterExam && !hasSubmitted && !hasTakenTheExamBefore;
-  const handleSubmit = useCallback(async () => {
-    if (!exam || !hasUserSelections || hasSubmitted) return;
-
+  async function handleSubmit() {
     setIsSubmitting(true);
 
     try {
-      const fieldToUpdate = hasTakenTheExamBefore
-        ? "afterScore"
-        : "beforeScore";
-
       sethasSubmitted(true);
 
-      // Update progress in the backend
-      const response = await axios.patch(
+      await axios.post("/api/results", {
+        userId,
+        courseId: params.courseId,
+        examId: params.examId,
+        points: Math.round(scorePercentage),
+      });
+      await axios.patch(
         `/api/courses/${params.courseId}/exam/${params.examId}/progress`,
         {
           percentage: scorePercentage,
-          userId: userId,
+          userId,
           userSelections,
         }
       );
 
-      if (scorePercentage >= 50 && !isFirstExam) {
+      if (scorePercentage >= 50) {
         toast.success(`احسنت! لقد أحرزت علامة ${scorePercentage.toFixed(1)}.`);
 
-        // Request to generate the certificate
         const certificateResponse = await axios.post(
           `/api/courses/${params.courseId}/exam/${params.examId}/certificate`
         );
-
         if (certificateResponse.status === 200) {
           toast.success("شهادتك جاهزة!");
           setCertificateId(certificateResponse.data.id);
           confetti.onOpen();
-        } else {
-          toast.error("لا يمكن إنشاء شهادة في هذا الوقت، آسف!");
         }
       } else if (scorePercentage < 50) {
         setFailedInExam(true);
@@ -186,29 +182,32 @@ const ExamIdPage = ({
           )}. يمكنك إعادة الاختبار بعد مراجعة الدورة التدريبية مرة أخرى.`
         );
       }
-
-      console.log("====================================");
-      console.log(response.data);
-      console.log("====================================");
     } catch (error) {
-      console.error("Error submitting exam:", error);
-      console.error("هناك شئ غير صحيح");
+      console.error("Error submitting exam or creating certificate:", error);
     } finally {
       setIsSubmitting(false);
     }
-  }, [
-    confetti,
-    exam,
-    hasUserSelections,
-    hasSubmitted,
-    hasTakenTheExamBefore,
-    params.courseId,
-    scorePercentage,
-    userId,
-    userSelections,
-    isFirstExam,
-    router,
-  ]);
+  }
+
+  // Know if user has passed exam already
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await axios.get(
+          `/api/results?userId=${userId}&courseId=${params.courseId}&examId=${params.examId}`
+        );
+        console.log("results", response.data);
+
+        if (response.data) {
+          sethasSubmitted(true);
+          setAlreadyPassed(true);
+          setScorePercentage(response.data.points);
+        }
+      } catch (error) {
+        console.error("Error fetching progress, or mostly because the user never passed this exam.", error);
+      }
+    })();
+  }, [params.courseId, params.examId, userId]);
 
   // Get the exam data and update the time remaining
   useEffect(() => {
@@ -358,8 +357,8 @@ const ExamIdPage = ({
               </div>
               <div className="flex flex-col space-y-4 ">
                 <p>مجموع الاسئلة: {exam?.questions.length}</p>
-                <p>عدد الأسئلة الصحيحة: {correctAnswers}</p>
-                <p>عدد الأسئلة الخاطئة: {wrongAnswers}</p>
+                <p>عدد الأسئلة الصحيحة: {Math.round((exam?.questions.length * scorePercentage) / 100)}</p>
+                <p>عدد الأسئلة الخاطئة: {exam?.questions.length - Math.round((exam?.questions.length * scorePercentage) / 100)}</p>
                 <p>النسبة المئوية: % {scorePercentage.toFixed(1)} </p>
               </div>
               <button
@@ -382,9 +381,9 @@ const ExamIdPage = ({
               </div>
               <div className="flex flex-col space-y-4 ">
                 <p>مجموع الاسئلة: {exam?.questions.length}</p>
-                <p>عدد الأسئلة الصحيحة: {correctAnswers}</p>
-                <p>عدد الأسئلة الخاطئة: {wrongAnswers}</p>
-                <p> النسبة المئوية: %{scorePercentage.toFixed(1)}</p>
+                <p>عدد الأسئلة الصحيحة: {Math.round((exam?.questions.length * scorePercentage) / 100)}</p>
+                <p>عدد الأسئلة الخاطئة: {exam?.questions.length - Math.round((exam?.questions.length * scorePercentage) / 100)}</p>
+                <p>النسبة المئوية: % {scorePercentage.toFixed(1)} </p>
               </div>
               <div>
                 <PrepareCertificateModal
@@ -426,7 +425,7 @@ const ExamIdPage = ({
                   "bg-sky-500 text-white w-fit font-bold text-sm px-4 py-2 rounded-md"
                 }
               >
-                اعادة الاختبار
+                تقدم
               </button>
             </div>
           )
@@ -548,10 +547,10 @@ const ExamIdPage = ({
                                           value={index + 1}
                                           disabled={disableSelect}
                                           // This is if you want to cheat haha
-                                          // defaultChecked={
-                                          //   option.position ===
-                                          //   Number(question.answer)
-                                          // }
+                                          defaultChecked={
+                                            option.position ===
+                                            Number(question.answer)
+                                          }
                                           onChange={() =>
                                             handleOptionChange(
                                               question.id,
@@ -635,7 +634,7 @@ const ExamIdPage = ({
       ) : (
         <div className="flex items-center justify-center h-full w-full">
           <div className="font-bold text-2xl text-slate-500 animate-pulse">
-            ...جارٍ تحميل الأسئلة
+            ...جارٍ تحميل الامتحان
           </div>
         </div>
       )}

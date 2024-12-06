@@ -412,7 +412,7 @@ const ExamIdPage = ({
                           ))}
 
                         {/* Show explanation for wrong answers */}
-                        {wrongAnswersQuiz.includes(question.id) && (
+                        {wrongAnswersQuiz.includes(question.id) && hasSubmitted && (
                           <div
                             className="mb-4 p-4 w-full flex flex-col gap-2 border border-black rounded-lg text-xs"
                             dir="rtl"

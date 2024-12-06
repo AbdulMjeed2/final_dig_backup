@@ -15,7 +15,7 @@ import { CourseProgress } from "@/components/course-progress";
 import { CourseSidebarItem } from "./course-sidebar-item";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { ArrowRight, CheckCircle, PlayCircle } from "lucide-react";
+import { ArrowRight, CheckCircle, PlayCircle, FileBadge } from "lucide-react";
 import { headers } from "next/headers";
 import LockIconWrapper from "./LockIconWrapper";
 
@@ -179,7 +179,7 @@ export const CourseSidebar = async ({
           <Link
             href={
               starterExamProgress?.isCompleted
-                ? `/courses/${course.id}/exam/${starterExam.id}/result/complete`
+                ? `/courses/${course.id}/exam/${starterExam.id}`
                 : `/courses/${course.id}/exam/${starterExam.id}`
             }
             type="button"
@@ -371,11 +371,9 @@ export const CourseSidebar = async ({
             type="button"
             href={
               progressCount >= 90 && taskCompleted
-                ? (examCompleted
-                  ? `/courses/${course.id}/exam/${exam.id}/result/complete`
-                  : `/courses/${course.id}/exam/${exam.id}`)
+                ? `/courses/${course.id}/exam/${exam.id}`
                 : "#"
-            }            
+            }
             className={cn(
               `flex items-center justify-end w-full gap-x-2 
             ${
@@ -426,9 +424,18 @@ export const CourseSidebar = async ({
         <div className="relative h-full ">
           <Link
             href={`/courses/${course.id}/exam/${exam?.id}/certificate/${certificate[0].id}`}
-            className="absolute bottom-8 right-16 bg-sky-700 py-4 px-8 text-white"
+            className="
+              flex items-center justify-between text-right w-full gap-x-2 py-4
+              text-sm font-[500] transition-all px-4 hover:text-slate-700 hover:bg-gray-300  border-r-4 border-opacity-0 hover:border-opacity-95 border-gray-600
+            "
           >
-            {" "}
+            <FileBadge
+              size={22}
+              className={cn(
+                "text-sky-500",
+                pathname?.includes(exam?.id) && "text-slate-700"
+              )}
+            />
             انظر شهادتك
           </Link>
         </div>

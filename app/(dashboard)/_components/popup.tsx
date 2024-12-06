@@ -85,6 +85,12 @@ export const Popup = () => {
                   <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
                     نتشرف بزيارتك لموقعنا و نتمنى ان يعجبك
                   </p>
+                  <p
+                    className="text-base leading-relaxed text-gray-700 dark:text-gray-400"
+                    dir="rtl"
+                  >
+                    مرحبا {userFullName} في موقع (digital-art) نتمنى لك المتعة والفائدة مثل هذه (موجودة في الموقع)
+                  </p>
                   <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
                     هناك كورس تعليمي للموقع اذا احسست انك ضائع في الموقع يرجى
                     مشاهدة الكورس

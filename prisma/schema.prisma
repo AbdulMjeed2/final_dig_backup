@@ -1,31 +1,29 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextIndex", "fullTextSearch"]
+}
+
 datasource db {
   provider     = "mysql"
   url          = env("DATABASE_URL")
   relationMode = "prisma"
 }
 
-generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["fullTextSearch", "fullTextIndex"]
-}
-
 model Course {
-  id          String    @id @default(uuid())
+  id          String       @id @default(uuid())
   userId      String
-  title       String    @db.LongText
-  description String?   @db.LongText
-  imageUrl    String?   @db.LongText
-  isPublished Boolean   @default(false)
-  firstExam   Boolean?  @default(false)
+  title       String       @db.LongText
+  description String?      @db.LongText
+  imageUrl    String?      @db.LongText
+  isPublished Boolean      @default(false)
+  firstExam   Boolean?     @default(false)
   categoryId  String?
-  category    Category? @relation(fields: [categoryId], references: [id])
-
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  category    Category?    @relation(fields: [categoryId], references: [id])
   chapters    Chapter[]
   attachments Attachment[]
   exams       Exam[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
   @@index([categoryId])
   @@fulltext([title])
@@ -38,132 +36,113 @@ model Category {
 }
 
 model Attachment {
-  id   String @id @default(uuid())
-  name String
-  url  String @db.LongText
-
-  courseId String
-  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
+  id        String   @id @default(uuid())
+  name      String
+  url       String   @db.LongText
+  courseId  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@index([courseId])
 }
 
 model TaskAttachment {
-  id   String  @id @default(uuid())
-  name String?
-  url  String  @db.LongText
-
+  id        String   @id @default(uuid())
+  name      String?
+  url       String   @db.LongText
   taskId    String
-  userId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  userId    String
 
   @@index([taskId])
 }
 
 model Chapter {
-  id          String  @id @default(uuid())
+  id          String   @id @default(uuid())
   title       String
-  description String? @db.LongText
-  isPublished Boolean @default(false)
+  description String?  @db.LongText
+  isPublished Boolean  @default(false)
   position    Int
-
-  courseId String
-  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
-  lessons Lesson[]
-  quiz    Quiz?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  courseId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons     Lesson[]
+  quiz        Quiz?
 
   @@index([courseId])
 }
 
 model Task {
-  id          String  @id @default(uuid())
+  id          String   @id @default(uuid())
   title       String
-  content     String? @db.LongText
-  isPublished Boolean @default(false)
-
-  courseId String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  content     String?  @db.LongText
+  isPublished Boolean  @default(false)
+  courseId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([courseId])
 }
 
 model UserProgress {
-  id     String @id @default(uuid())
-  userId String
-
-  lessonId String
-  lesson   Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-
+  id          String   @id @default(uuid())
+  userId      String
+  lessonId    String
   isCompleted Boolean  @default(false)
-  startedAt   Float?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   percentage  Float?   @default(0)
+  startedAt   Float?
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   @@unique([userId, lessonId])
   @@index([lessonId])
 }
 
 model UserQuizPoints {
-  id     String @id @default(uuid())
-  userId String
-
-  quizId String
-  quiz   Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
-
-  points Int @default(0)
-
+  id        String   @id @default(uuid())
+  userId    String
+  quizId    String
+  points    Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  quiz      Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
 
   @@unique([userId, quizId])
   @@index([quizId])
 }
 
 model Lesson {
-  id          String  @id @default(uuid())
-  title       String
-  description String? @db.LongText
-  videoUrl    String? @db.LongText
-  position    Int
-  isPublished Boolean @default(false)
-
-  chapterId String
-  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-
+  id           String         @id @default(uuid())
+  title        String
+  description  String?        @db.LongText
+  videoUrl     String?        @db.LongText
+  position     Int
+  isPublished  Boolean        @default(false)
+  chapterId    String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  chapter      Chapter        @relation(fields: [chapterId], references: [id], onDelete: Cascade)
   userProgress UserProgress[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
   @@index([chapterId])
 }
 
 model Quiz {
-  id          String  @id @default(uuid())
-  title       String
-  description String? @db.LongText
-  isPublished Boolean @default(false)
-  userId      String? @default("nil")
-
-  chapterId String  @unique
-  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-
+  id             String           @id @default(uuid())
+  title          String
+  description    String?          @db.LongText
+  isPublished    Boolean          @default(false)
+  userId         String?          @default("nil")
+  chapterId      String           @unique
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  chapter        Chapter          @relation(fields: [chapterId], references: [id], onDelete: Cascade)
   userQuizPoints UserQuizPoints[]
   questions      QuizQuestion[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
   @@index([chapterId])
 }
@@ -171,12 +150,8 @@ model Quiz {
 model Exam {
   id           String         @id @default(uuid())
   courseId     String
-  course       Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
   title        String
   description  String?
-  userId       String?        @default("nil")
-  questions    ExamQuestion[]
-  certificate  Certificate[]
   passingScore Int?           @default(70)
   beforeScore  Float?         @default(0)
   afterScore   Float?         @default(0)
@@ -184,6 +159,10 @@ model Exam {
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   starterExam  Boolean        @default(false)
+  userId       String?        @default("nil")
+  course       Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  questions    ExamQuestion[]
+  certificate  Certificate[]
 
   @@index([courseId])
 }
@@ -191,15 +170,15 @@ model Exam {
 model ExamQuestion {
   id          String               @id @default(uuid())
   examId      String
-  exam        Exam                 @relation(fields: [examId], references: [id], onDelete: Cascade)
   prompt      String
   position    Int
-  options     ExamQuestionOption[]
   answer      String               @default("1")
   isPublished Boolean              @default(false)
   explanation String?
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
+  exam        Exam                 @relation(fields: [examId], references: [id], onDelete: Cascade)
+  options     ExamQuestionOption[]
 
   @@index([examId])
 }
@@ -207,34 +186,34 @@ model ExamQuestion {
 model QuizQuestion {
   id          String               @id @default(uuid())
   quizId      String
-  quiz        Quiz                 @relation(fields: [quizId], references: [id], onDelete: Cascade)
   prompt      String
-  options     QuizQuestionOption[]
   isPublished Boolean              @default(false)
   position    Int
   answer      String               @default("1")
   explanation String?              @db.Text
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
+  quiz        Quiz                 @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  options     QuizQuestionOption[]
 
   @@index([quizId])
 }
 
 model ExamOptions {
   id        String   @id @default(uuid())
-  examId    String
-  userId    String
   options   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  examId    String
+  userId    String
 }
 
 model ExamQuestionOption {
   id         String       @id @default(uuid())
-  question   ExamQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId String
   text       String
   position   Int          @default(autoincrement())
+  question   ExamQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@index([questionId])
   @@index([position])
@@ -242,10 +221,10 @@ model ExamQuestionOption {
 
 model QuizQuestionOption {
   id         String       @id @default(uuid())
-  question   QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId String
   text       String
   position   Int          @default(autoincrement())
+  question   QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@index([questionId])
   @@index([position])
@@ -253,12 +232,13 @@ model QuizQuestionOption {
 
 model Certificate {
   id             String   @id @default(uuid())
-  exam           Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
   examId         String
   nameOfStudent  String?
   userId         String?
   courseTitle    String
   dateOfIssuance DateTime @default(now())
+  createdAt      DateTime @default(now())
+  exam           Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
 
   @@index([examId])
 }
@@ -268,9 +248,9 @@ model Message {
   userId       String?  @default("nil")
   context      String   @db.LongText
   messageId    String?
-  repliesCount Float?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  repliesCount Float?
   reply        Reply[]
 }
 
@@ -298,10 +278,10 @@ model LibraryText {
 model UserStats {
   id               String   @id
   lessonsCompleted Float?   @default(0)
-  quizsCompleted   Float?   @default(0)
-  examsCompleted   Float?   @default(0)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+  examsCompleted   Float?   @default(0)
+  quizsCompleted   Float?   @default(0)
 }
 
 model Reply {
@@ -310,17 +290,16 @@ model Reply {
   context   String   @db.LongText
   replyId   String?
   messageId String?
-  message   Message? @relation(fields: [messageId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  message   Message? @relation(fields: [messageId], references: [id], onDelete: Cascade)
 
   @@index([messageId])
 }
 
 model AssistPages {
-  id     String  @id @default(uuid())
-  userId String? @default("nil")
-
+  id               String   @id @default(uuid())
+  userId           String?  @default("nil")
   introductionPage Boolean?
   goalsPage        Boolean?
   contactPage      Boolean?
@@ -328,7 +307,42 @@ model AssistPages {
   messagesPage     Boolean?
   leaderboardPage  Boolean?
   libraryPage      Boolean?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
 
+model Result {
+  id        String   @id @default(uuid())
+  userId    String
+  courseId  String
+  examId    String
+  points    Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([courseId])
+  @@index([examId])
+}
+
+model DialogBoxCheck {
+  id        String              @id
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+  page      DialogBoxCheck_page
+  checked   Boolean             @default(false)
+  userId    String
+
+  @@unique([userId, page])
+  @@index([userId])
+}
+
+enum DialogBoxCheck_page {
+  introductionPage
+  goalsPage
+  contactPage
+  coursesPage
+  messagesPage
+  leaderboardPage
+  libraryPage
 }
