@@ -37,7 +37,7 @@ export async function POST(
     const certificate = await db.certificate.create({
       data: {
         examId: params.examId,
-        courseTitle: exam.course.title,
+        courseTitle: exam.course?.title || "Course Title Not Found",
         userId: userId,
         nameOfStudent: nameOfStudent,
       },
