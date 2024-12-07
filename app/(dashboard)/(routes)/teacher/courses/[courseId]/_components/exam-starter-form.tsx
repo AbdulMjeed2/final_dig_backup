@@ -35,7 +35,7 @@ const formSchema = z.object({
   description: z.string().min(1),
   type: z.enum(["exam", "form"]),
   starter: z.boolean(),
-  url: z.string().url().optional(), // Required only if type is 'form'
+  examUrl: z.string().url().optional(), // Required only if type is 'form'
 });
 
 export const StarterExamForm = ({ initialData, courseId }: ExamFormProps) => {
@@ -49,7 +49,7 @@ export const StarterExamForm = ({ initialData, courseId }: ExamFormProps) => {
       description: "",
       type: "exam",
       starter: true,
-      url: "",
+      examUrl: "",
     },
   });
 
@@ -184,7 +184,7 @@ export const StarterExamForm = ({ initialData, courseId }: ExamFormProps) => {
             {form.watch("type") === "form" && (
               <FormField
                 control={form.control}
-                name="url"
+                name="examUrl"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>

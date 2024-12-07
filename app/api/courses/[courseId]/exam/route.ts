@@ -9,7 +9,7 @@ export async function POST(
 ) {
   try {
     const { userId } = auth();
-    const { title, description,starter } = await req.json();
+    const { title, description,starter, examUrl } = await req.json();
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
@@ -33,6 +33,8 @@ export async function POST(
         courseId: params.courseId,
         userId,
         starterExam: starter ? true : false,
+        examUrl: examUrl ? examUrl : null,
+        isPublished: true,
       },
     });
     const course = await db.course.findUnique({

@@ -149,7 +149,7 @@ model Quiz {
 
 model Exam {
   id           String         @id @default(uuid())
-  courseId     String
+  courseId     String?
   title        String
   description  String?
   passingScore Int?           @default(70)
@@ -160,9 +160,10 @@ model Exam {
   updatedAt    DateTime       @updatedAt
   starterExam  Boolean        @default(false)
   userId       String?        @default("nil")
-  course       Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course       Course?        @relation(fields: [courseId], references: [id], onDelete: Cascade)
   questions    ExamQuestion[]
   certificate  Certificate[]
+  examUrl      String?        @db.LongText
 
   @@index([courseId])
 }

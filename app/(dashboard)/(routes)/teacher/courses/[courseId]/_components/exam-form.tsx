@@ -33,7 +33,7 @@ const formSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
   type: z.enum(["exam", "form"]),
-  url: z.string().url().optional(), // Required only if type is 'form'
+  examUrl: z.string().url().optional(), // Required only if type is 'form'
 });
 
 export const ExamForm = ({ initialData, courseId }: ExamFormProps) => {
@@ -46,7 +46,7 @@ export const ExamForm = ({ initialData, courseId }: ExamFormProps) => {
       title: "",
       description: "",
       type: "exam",
-      url: "",
+      examUrl: "",
     },
   });
 
@@ -57,14 +57,14 @@ export const ExamForm = ({ initialData, courseId }: ExamFormProps) => {
       if (values.type === "exam") {
         await axios.post(`/api/courses/${courseId}/exam`, values);
       } else if (values.type === "form") {
-        await axios.post(`/api/courses/${courseId}/form`, values);
+        await axios.post(`/api/courses/${courseId}/exam`, values);
       }
       toast.success("تم إنشاء الامتحان/الرابط");
       setIsCreating(false);
       router.refresh();
     } catch (error) {
       //toast.error("هناك شئ غير صحيح");
-console.error("هناك شئ غير صحيح");
+      console.error("هناك شئ غير صحيح");
     }
   };
 
@@ -179,7 +179,7 @@ console.error("هناك شئ غير صحيح");
             {form.watch("type") === "form" && (
               <FormField
                 control={form.control}
-                name="url"
+                name="examUrl"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -206,10 +206,7 @@ console.error("هناك شئ غير صحيح");
       )}
       {!isCreating && (
         <div
-          className={cn(
-            "text-sm mt-2",
-            !FinalExams && "text-slate-500 italic"
-          )}
+          className={cn("text-sm mt-2", !FinalExams && "text-slate-500 italic")}
         >
           {FinalExams.map((exam: any, index: number) => (
             <div
@@ -218,9 +215,7 @@ console.error("هناك شئ غير صحيح");
                 "flex justify-between items-center py-3 pl-3 gap-x-2 bg-slate-200 border-slate-200 border text-slate-700 rounded-md mb-4 text-sm"
               )}
             >
-              <div>
-                {exam.type === "exam" ? exam.title : exam.url}
-              </div>
+              <div>{exam.type === "exam" ? exam.title : exam.url}</div>
               <div className="ml-auto pr-2 flex items-center gap-x-2">
                 <Badge
                   className={cn(

@@ -6,7 +6,7 @@ import { redirect, useRouter } from "next/navigation";
 import { Preview } from "@/components/preview";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
-import { useCallback, useEffect, useState } from "react";
+import { useRef, useCallback, useEffect, useState } from "react";
 import { Prisma, Certificate, Course } from "@prisma/client";
 import axios from "axios";
 import { useConfettiStore } from "@/hooks/use-confetti-store";
@@ -24,6 +24,7 @@ import {
 import { escape } from "querystring";
 import FroalaEditorView from "react-froala-wysiwyg/FroalaEditorView";
 import { FormButton2 } from "../../_components/formButton2";
+import { StarterExamForm } from "@/app/(dashboard)/(routes)/teacher/courses/[courseId]/_components/exam-starter-form";
 
 type ExamWithQuestionsAndOptions = Prisma.ExamGetPayload<{
   include: {
@@ -45,6 +46,7 @@ const ExamIdPage = ({
   params: { courseId: string; examId: string };
 }) => {
   const { userId } = useAuth();
+  const examForm = useRef<HTMLIFrameElement>(null);
 
   const confetti = useConfettiStore();
 
@@ -204,7 +206,10 @@ const ExamIdPage = ({
           setScorePercentage(response.data.points);
         }
       } catch (error) {
-        console.error("Error fetching progress, or mostly because the user never passed this exam.", error);
+        console.error(
+          "Error fetching progress, or mostly because the user never passed this exam.",
+          error
+        );
       }
     })();
   }, [params.courseId, params.examId, userId]);
@@ -331,6 +336,31 @@ const ExamIdPage = ({
     })();
   }, [params.courseId, userId]);
 
+  /**
+   * Modify form iframe height
+   */
+
+  useEffect(() => {
+    const adjustIframeHeight = () => {
+      if (examForm.current) {
+        const iframe = examForm.current;
+        try {
+          iframe.style.height =
+            iframe?.contentWindow?.document?.body?.scrollHeight + "px";
+        } catch (error) {
+          console.error("Error adjusting iframe height:", error);
+        }
+      }
+    };
+    const iframe = examForm.current;
+    if (iframe) {
+      iframe.addEventListener("load", adjustIframeHeight);
+      return () => {
+        iframe.removeEventListener("load", adjustIframeHeight);
+      };
+    }
+  }, [examForm.current]);
+
   if (!userId) {
     return redirect("/");
   }
@@ -339,94 +369,142 @@ const ExamIdPage = ({
     <>
       {exam ? (
         hasSubmitted ? (
-          isFirstExam ? (
-            <div
-              dir="rtl"
-              className="w-full p-20 flex h-full flex-col  gap-4   "
-            >
-              <div className="flex flex-col space-x-4 ">
-                <h1 className="text-lg md:text-xl font-medium capitalize">
-                  {" "}
-                  عزيزتي المتدربة انتهى الاختبار القبلي وحصلتي على نسبة{" "}
-                  {"%" + scorePercentage.toFixed(1)}{" "}
-                </h1>
-                <h1 className="text-base md:text-xl font-medium capitalize">
-                  {" "}
-                  وأتمنى لك المتعة والفائدة من دراسة هذه الدورة.{" "}
-                </h1>
-              </div>
-              <div className="flex flex-col space-y-4 ">
-                <p>مجموع الاسئلة: {exam?.questions.length}</p>
-                <p>عدد الأسئلة الصحيحة: {Math.round((exam?.questions.length * scorePercentage) / 100)}</p>
-                <p>عدد الأسئلة الخاطئة: {exam?.questions.length - Math.round((exam?.questions.length * scorePercentage) / 100)}</p>
-                <p>النسبة المئوية: % {scorePercentage.toFixed(1)} </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleNext}
-                className={
-                  "bg-sky-500 text-white w-fit font-bold text-sm px-4 py-2 rounded-md"
-                }
+          !exam.examUrl ? (
+            isFirstExam ? (
+              <div
+                dir="rtl"
+                className="w-full p-20 flex h-full flex-col  gap-4   "
               >
-                تقدم
-              </button>
-            </div>
-          ) : scorePercentage > 60 ? (
-            <div dir="rtl" className="w-full p-20 flex h-full flex-col  gap-4">
-              <div className="flex flex-col space-x-4 ">
-                <h1 className="text-lg md:text-xl font-medium capitalize">
-                  {" "}
-                  لقد اجتزت الاختبار بنجاح، ويمكنك الان الحصول على الشهادة
-                </h1>
-              </div>
-              <div className="flex flex-col space-y-4 ">
-                <p>مجموع الاسئلة: {exam?.questions.length}</p>
-                <p>عدد الأسئلة الصحيحة: {Math.round((exam?.questions.length * scorePercentage) / 100)}</p>
-                <p>عدد الأسئلة الخاطئة: {exam?.questions.length - Math.round((exam?.questions.length * scorePercentage) / 100)}</p>
-                <p>النسبة المئوية: % {scorePercentage.toFixed(1)} </p>
-              </div>
-              <div>
-                <PrepareCertificateModal
-                  courseId={params.courseId}
-                  examId={params.examId}
-                  // certificateId={certificateId}
+                <div className="flex flex-col space-x-4 ">
+                  <h1 className="text-lg md:text-xl font-medium capitalize">
+                    {" "}
+                    عزيزتي المتدربة انتهى الاختبار القبلي وحصلتي على نسبة{" "}
+                    {"%" + scorePercentage.toFixed(1)}{" "}
+                  </h1>
+                  <h1 className="text-base md:text-xl font-medium capitalize">
+                    {" "}
+                    وأتمنى لك المتعة والفائدة من دراسة هذه الدورة.{" "}
+                  </h1>
+                </div>
+                <div className="flex flex-col space-y-4 ">
+                  <p>مجموع الاسئلة: {exam?.questions.length}</p>
+                  <p>
+                    عدد الأسئلة الصحيحة:{" "}
+                    {Math.round(
+                      (exam?.questions.length * scorePercentage) / 100
+                    )}
+                  </p>
+                  <p>
+                    عدد الأسئلة الخاطئة:{" "}
+                    {exam?.questions.length -
+                      Math.round(
+                        (exam?.questions.length * scorePercentage) / 100
+                      )}
+                  </p>
+                  <p>النسبة المئوية: % {scorePercentage.toFixed(1)} </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className={
+                    "bg-sky-500 text-white w-fit font-bold text-sm px-4 py-2 rounded-md"
+                  }
                 >
-                  <Button
-                    size="sm"
-                    className="bg-sky-500 text-white hover:bg-sky-400"
-                  >
-                    احصل على شهادتك
-                  </Button>
-                </PrepareCertificateModal>
+                  تقدم
+                </button>
               </div>
-            </div>
-          ) : (
-            <div
-              dir="rtl"
-              className="w-full p-20 flex h-full flex-col  gap-4   "
-            >
-              <div className="flex flex-col space-x-4 ">
-                <h1 className="text-lg md:text-xl font-medium capitalize">
-                  {" "}
-                  ينبغي عليك إعادة الدورة التدريبية مرة أخرى للاستفادة والحصول
-                  على الشهادة.{" "}
-                </h1>
-              </div>
-              <div className="flex flex-col space-y-4 ">
-                <p>مجموع الاسئلة: {exam?.questions.length}</p>
-                <p>عدد الأسئلة الصحيحة: {correctAnswers}</p>
-                <p>عدد الأسئلة الخاطئة: {wrongAnswers}</p>
-                <p>النسبة المئوية:% {scorePercentage.toFixed(1)}</p>
-              </div>
-              <button
-                type="button"
-                onClick={handleNext}
-                className={
-                  "bg-sky-500 text-white w-fit font-bold text-sm px-4 py-2 rounded-md"
-                }
+            ) : scorePercentage > 60 ? (
+              <div
+                dir="rtl"
+                className="w-full p-20 flex h-full flex-col  gap-4"
               >
-                تقدم
-              </button>
+                <div className="flex flex-col space-x-4 ">
+                  <h1 className="text-lg md:text-xl font-medium capitalize">
+                    {" "}
+                    لقد اجتزت الاختبار بنجاح، ويمكنك الان الحصول على الشهادة
+                  </h1>
+                </div>
+                <div className="flex flex-col space-y-4 ">
+                  <p>مجموع الاسئلة: {exam?.questions.length}</p>
+                  <p>
+                    عدد الأسئلة الصحيحة:{" "}
+                    {Math.round(
+                      (exam?.questions.length * scorePercentage) / 100
+                    )}
+                  </p>
+                  <p>
+                    عدد الأسئلة الخاطئة:{" "}
+                    {exam?.questions.length -
+                      Math.round(
+                        (exam?.questions.length * scorePercentage) / 100
+                      )}
+                  </p>
+                  <p>النسبة المئوية: % {scorePercentage.toFixed(1)} </p>
+                </div>
+                <div>
+                  <PrepareCertificateModal
+                    courseId={params.courseId}
+                    examId={params.examId}
+                    // certificateId={certificateId}
+                  >
+                    <Button
+                      size="sm"
+                      className="bg-sky-500 text-white hover:bg-sky-400"
+                    >
+                      احصل على شهادتك
+                    </Button>
+                  </PrepareCertificateModal>
+                </div>
+              </div>
+            ) : (
+              <div
+                dir="rtl"
+                className="w-full p-20 flex h-full flex-col  gap-4   "
+              >
+                <div className="flex flex-col space-x-4 ">
+                  <h1 className="text-lg md:text-xl font-medium capitalize">
+                    {" "}
+                    ينبغي عليك إعادة الدورة التدريبية مرة أخرى للاستفادة والحصول
+                    على الشهادة.{" "}
+                  </h1>
+                </div>
+                <div className="flex flex-col space-y-4 ">
+                  <p>مجموع الاسئلة: {exam?.questions.length}</p>
+                  <p>عدد الأسئلة الصحيحة: {correctAnswers}</p>
+                  <p>عدد الأسئلة الخاطئة: {wrongAnswers}</p>
+                  <p>النسبة المئوية:% {scorePercentage.toFixed(1)}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className={
+                    "bg-sky-500 text-white w-fit font-bold text-sm px-4 py-2 rounded-md"
+                  }
+                >
+                  تقدم
+                </button>
+              </div>
+            )
+          ) : (
+            <div className="flex flex-col gap-2 p-10">
+              <p className="text-base text-gray-500 text-right">
+                !إذا قمت بإرسال النموذج السابق، فسيتمكن المعلم من مراجعة إجاباتك
+                <br />
+                {exam?.starterExam
+                  ? "!في الوقت الحالي، يمكنك الانتقال إلى الدروس التالية"
+                  : "!في الوقت الحالي، لقد أنهيت الدورة التدريبية، مبروك"}
+              </p>
+              {exam?.starterExam && (
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className={
+                    "bg-sky-500 text-white w-fit font-bold text-sm px-4 py-2 rounded-md ml-auto"
+                  }
+                >
+                  تقدم
+                </button>
+              )}
             </div>
           )
         ) : (
@@ -440,11 +518,14 @@ const ExamIdPage = ({
               ) : (
                 <div className="w-full flex flex-col gap-4 justify-center items-end">
                   <div className="flex space-x-4 items-center">
-                    <h1 className="text-lg md:text-xl font-medium capitalize">
-                      مجموع الأسئلة {exam?.questions.length}
-                    </h1>
-
-                    <span className="mx-4">|</span>
+                    {!exam?.examUrl && (
+                      <>
+                        <h1 className="text-lg md:text-xl font-medium capitalize">
+                          مجموع الأسئلة {exam?.questions.length}
+                        </h1>
+                        <span className="mx-4">|</span>
+                      </>
+                    )}
 
                     <h1 className="text-lg md:text-2xl font-medium capitalize">
                       {exam?.title}
@@ -460,24 +541,30 @@ const ExamIdPage = ({
                         {" "}
                         <FroalaEditorView model={exam.description} />
                       </div>
-                      <FormButton2
-                        url={"#"}
-                        // url={exam.url ? exam.url : "#"}
-                        text="المقياس القبلي"
-                        passedText="تم إكمال النموذج"
-                      />
+
+                      {exam?.examUrl && (
+                        <div className="flex flex-col items-center space-y-4 w-full">
+                          <iframe
+                            src={exam?.examUrl}
+                            ref={examForm}
+                            className="w-full min-h-[800px] border-0"
+                          />
+                        </div>
+                      )}
                     </div>
                   ) : (
-                    <FormButton2
-                      url={"#"}
-                      // url={exam.url ? exam.url : "#"}
-                      text="المقياس البعدي"
-                      passedText="تم إكمال النموذج"
-                    />
+                    exam?.examUrl && (
+                      <div className="flex w-full flex-col items-center space-y-4">
+                        <iframe
+                          src={exam?.examUrl}
+                          ref={examForm}
+                          className="w-full min-h-[800px] border-0"
+                        />
+                      </div>
+                    )
                   )}
                 </div>
               )}
-
               <div className="flex flex-col items-center relative">
                 {exam?.questions
                   .sort((a, b) => a.position - b.position)
@@ -626,6 +713,12 @@ const ExamIdPage = ({
                       </div>
                     )}
                   </div>
+                  {exam?.examUrl && (
+                    <p className="text-xs text-gray-500">
+                      فقط قم بتقديم الامتحان بعد تقديم النموذج أعلاه أو لن يتم
+                      حفظ تقدمك
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

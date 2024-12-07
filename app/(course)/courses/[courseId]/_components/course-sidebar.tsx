@@ -69,6 +69,17 @@ export const CourseSidebar = async ({
       },
     },
   });
+  const starterForm = await db.exam.findFirst({
+    where: {
+      courseId: course.id,
+      isPublished: true,
+      starterExam: true,
+      examUrl: {
+        not: null,
+      },
+    },
+  });
+  console.log('exam url: ', starterForm?.examUrl)
   const starterExamProgress = await db.userProgress.findFirst({
     where: {
       lessonId: starterExam?.id,
@@ -136,7 +147,7 @@ export const CourseSidebar = async ({
       include: {
         certificate: true,
       },
-    });
+    }); 
 
     if (!starterExam) {
       return { passed: false, message: "No starter exam found." };
@@ -174,7 +185,7 @@ export const CourseSidebar = async ({
           <CourseProgress variant="default" value={progressCount} />
         </div>
       </div>
-      <div className="flex flex-col w-full">
+      <div className="flex flex-col w-full"> 
         {starterExam && (
           <Link
             href={
