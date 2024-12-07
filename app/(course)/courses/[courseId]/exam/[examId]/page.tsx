@@ -176,7 +176,7 @@ const ExamIdPage = ({
           setCertificateId(certificateResponse.data.id);
           confetti.onOpen();
         }
-      } else if (scorePercentage < 50) {
+      } else if (scorePercentage < 50 && !exam?.examUrl) {
         setFailedInExam(true);
         toast.error(
           `لقد احرزت علامة ${scorePercentage.toFixed(
