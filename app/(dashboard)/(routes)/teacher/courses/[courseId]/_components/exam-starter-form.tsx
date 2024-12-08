@@ -120,7 +120,7 @@ export const StarterExamForm = ({ initialData, courseId }: ExamFormProps) => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 mb-3">
                       <label className="flex items-center gap-2 border p-2 rounded-lg cursor-pointer" htmlFor="exam_option">
                         <input
                           type="radio"
@@ -129,7 +129,7 @@ export const StarterExamForm = ({ initialData, courseId }: ExamFormProps) => {
                           onChange={field.onChange}
                           id="exam_option"
                         />
-                        المقياس
+                        الاختبار
                       </label>
                       <label className="flex items-center gap-2 border p-2 rounded-lg cursor-pointer" htmlFor="form_option">
                         <input
@@ -139,7 +139,7 @@ export const StarterExamForm = ({ initialData, courseId }: ExamFormProps) => {
                           onChange={field.onChange}
                           id="form_option"
                         />
-                        الاختبار
+                        المقياس
                       </label>
                     </div>
                   </FormControl>

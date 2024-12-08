@@ -117,24 +117,24 @@ export const ExamForm = ({ initialData, courseId }: ExamFormProps) => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <div>
-                      <label>
+                    <div className="flex items-center gap-2 mb-3">
+                      <label className="flex items-center gap-2 border p-2 rounded-lg cursor-pointer">
                         <input
                           type="radio"
                           value="exam"
                           checked={field.value === "exam"}
                           onChange={field.onChange}
                         />
-                        امتحان
+                        الاختبار
                       </label>
-                      <label>
+                      <label className="flex items-center gap-2 border p-2 rounded-lg cursor-pointer">
                         <input
                           type="radio"
                           value="form"
                           checked={field.value === "form"}
                           onChange={field.onChange}
                         />
-                        الاختبار
+                        المقياس
                       </label>
                     </div>
                   </FormControl>
@@ -142,7 +142,7 @@ export const ExamForm = ({ initialData, courseId }: ExamFormProps) => {
                 </FormItem>
               )}
             />
-            <Label>-:عنوان</Label>
+            <Label>-عنوان:</Label>
             <FormField
               control={form.control}
               name="title"
@@ -159,7 +159,7 @@ export const ExamForm = ({ initialData, courseId }: ExamFormProps) => {
                 </FormItem>
               )}
             />
-            <Label className="mt-2">وصف:-</Label>
+            <Label className="mt-2">وصف:</Label>
             <FormField
               control={form.control}
               name="description"
