@@ -4,7 +4,7 @@ import * as z from "zod";
 import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Delete, Loader2, Pencil, PlusCircle } from "lucide-react";
+import { Trash, Loader2, Pencil, PlusCircle } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -33,7 +33,7 @@ const formSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
   type: z.enum(["exam", "form"]),
-  examUrl: z.string().url().optional(), // Required only if type is 'form'
+  examUrl: z.string().min(0), // Required only if type is 'form'
 });
 
 export const ExamForm = ({ initialData, courseId }: ExamFormProps) => {
@@ -45,7 +45,6 @@ export const ExamForm = ({ initialData, courseId }: ExamFormProps) => {
     defaultValues: {
       title: "",
       description: "",
-      type: "exam",
       examUrl: "",
     },
   });
@@ -54,11 +53,7 @@ export const ExamForm = ({ initialData, courseId }: ExamFormProps) => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      if (values.type === "exam") {
-        await axios.post(`/api/courses/${courseId}/exam`, values);
-      } else if (values.type === "form") {
-        await axios.post(`/api/courses/${courseId}/exam`, values);
-      }
+      await axios.post(`/api/courses/${courseId}/exam`, values);
       toast.success("تم إنشاء الامتحان/الرابط");
       setIsCreating(false);
       router.refresh();
@@ -72,21 +67,13 @@ export const ExamForm = ({ initialData, courseId }: ExamFormProps) => {
     (e: any) => e.starterExam === false
   );
 
-  const onEdit = (id: string | undefined, type: string) => {
-    if (type === "exam") {
-      router.push(`/teacher/courses/${courseId}/exam/${id}`);
-    } else if (type === "form") {
-      router.push(`/teacher/courses/${courseId}/form/${id}`);
-    }
+  const onEdit = (id: string | undefined) => {
+    router.push(`/teacher/courses/${courseId}/exam/${id}`);
   };
 
-  const onDelete = async (id: string | undefined, type: string) => {
+  const onDelete = async (id: string | undefined) => {
     try {
-      if (type === "exam") {
-        await axios.delete(`/api/courses/${courseId}/exam/${id}`);
-      } else if (type === "form") {
-        await axios.delete(`/api/courses/${courseId}/form/${id}`);
-      }
+      await axios.delete(`/api/courses/${courseId}/exam/${id}`);
       toast.success("تم حذف العنصر");
       router.refresh();
     } catch (error) {
@@ -215,7 +202,6 @@ export const ExamForm = ({ initialData, courseId }: ExamFormProps) => {
                 "flex justify-between items-center py-3 pl-3 gap-x-2 bg-slate-200 border-slate-200 border text-slate-700 rounded-md mb-4 text-sm"
               )}
             >
-              <div>{exam.type === "exam" ? exam.title : exam.url}</div>
               <div className="ml-auto pr-2 flex items-center gap-x-2">
                 <Badge
                   className={cn(
@@ -225,17 +211,18 @@ export const ExamForm = ({ initialData, courseId }: ExamFormProps) => {
                 >
                   {exam.isPublished ? "نشرت" : "مسودة"}
                 </Badge>
-                <Delete
-                  onClick={() => onDelete(exam.id, exam.type)}
+                <Trash
+                  onClick={() => onDelete(exam.id)}
                   className="w-4 h-4 cursor-pointer hover:opacity-75 transition"
                 />
-                {exam.type === "exam" && (
+                {!exam.examUrl && (
                   <Pencil
-                    onClick={() => onEdit(exam.id, exam.type)}
+                    onClick={() => onEdit(exam.id)}
                     className="w-4 h-4 cursor-pointer hover:opacity-75 transition"
                   />
                 )}
               </div>
+              <div>{exam.examUrl ? exam.examUrl : exam.title}</div>
             </div>
           ))}
         </div>

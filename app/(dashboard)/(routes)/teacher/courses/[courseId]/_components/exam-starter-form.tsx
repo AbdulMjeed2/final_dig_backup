@@ -4,9 +4,9 @@ import * as z from "zod";
 import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Delete, Loader2, Pencil, PlusCircle } from "lucide-react";
+import { Delete, Trash, Pencil, PlusCircle } from "lucide-react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { Course, Exam } from "@prisma/client";
@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@radix-ui/react-label";
+import { log } from "console";
 
 interface ExamFormProps {
   initialData: any;
@@ -35,12 +36,12 @@ const formSchema = z.object({
   description: z.string().min(1),
   type: z.enum(["exam", "form"]),
   starter: z.boolean(),
-  examUrl: z.string().url().optional(), // Required only if type is 'form'
+  examUrl: z.string().min(0),
 });
 
 export const StarterExamForm = ({ initialData, courseId }: ExamFormProps) => {
   const [isCreating, setIsCreating] = useState(false);
-  const router = useRouter();
+  const router = useRouter(); 
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -57,11 +58,7 @@ export const StarterExamForm = ({ initialData, courseId }: ExamFormProps) => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      if (values.type === "exam") {
-        await axios.post(`/api/courses/${courseId}/exam`, values);
-      } else if (values.type === "form") {
-        await axios.post(`/api/courses/${courseId}/exam`, values);
-      }
+      await axios.post(`/api/courses/${courseId}/exam`, values);
       toast.success("تم إنشاء الامتحان/الرابط");
       setIsCreating(false);
       router.refresh();
@@ -71,21 +68,13 @@ export const StarterExamForm = ({ initialData, courseId }: ExamFormProps) => {
     }
   };
 
-  const onEdit = (id: string | null, type: string) => {
-    if (type === "exam") {
-      router.push(`/teacher/courses/${courseId}/exam/${id}`);
-    } else if (type === "form") {
-      router.push(`/teacher/courses/${courseId}/exam/${id}`);
-    }
+  const onEdit = (id: string | null) => {
+    router.push(`/teacher/courses/${courseId}/exam/${id}`);
   };
 
-  const onDelete = async (id: string | undefined, type: string) => {
+  const onDelete = async (id: string | undefined) => {
     try {
-      if (type === "exam") {
-        await axios.delete(`/api/courses/${courseId}/exam/${id}`);
-      } else if (type === "form") {
-        await axios.delete(`/api/courses/${courseId}/exam/${id}`);
-      }
+      await axios.delete(`/api/courses/${courseId}/exam/${id}`);
       toast.success("تم حذف العنصر");
       router.refresh();
     } catch (error) {
@@ -94,7 +83,7 @@ export const StarterExamForm = ({ initialData, courseId }: ExamFormProps) => {
   };
 
   const starterItems = initialData.exams?.filter(
-    (item: any) => item.starter === true
+    (item: any) => item.starterExam === true
   );
 
   return (
@@ -223,7 +212,6 @@ export const StarterExamForm = ({ initialData, courseId }: ExamFormProps) => {
                 "flex justify-between items-center py-3 pl-3 gap-x-2 bg-slate-200 border-slate-200 border text-slate-700 rounded-md mb-4 text-sm"
               )}
             >
-              <div>{item.type === "exam" ? item.title : item.url}</div>
               <div className="ml-auto pr-2 flex items-center gap-x-2">
                 <Badge
                   className={cn(
@@ -233,17 +221,18 @@ export const StarterExamForm = ({ initialData, courseId }: ExamFormProps) => {
                 >
                   {item.isPublished ? "نشرت" : "مسودة"}
                 </Badge>
-                <Delete
-                  onClick={() => onDelete(item.id, item.type)}
+                <Trash
+                  onClick={() => onDelete(item.id)}
                   className="w-4 h-4 cursor-pointer hover:opacity-75 transition"
                 />
-                {item.type === "exam" && (
+                {!item.examUrl && (
                   <Pencil
-                    onClick={() => onEdit(item.id, item.type)}
+                    onClick={() => onEdit(item.id)}
                     className="w-4 h-4 cursor-pointer hover:opacity-75 transition"
                   />
                 )}
               </div>
+              <div>{item.examUrl ? item.examUrl : item.title}</div>
             </div>
           ))}
         </div>

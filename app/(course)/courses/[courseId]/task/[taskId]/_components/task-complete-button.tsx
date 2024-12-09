@@ -59,7 +59,7 @@ console.error("هناك شئ غير صحيح");
       
       type="button"
       variant={isCompleted ? "outline" : "success"}
-      className="w-full md:w-auto bg-sky-700 hover:bg-sky-600"
+      className="w-full md:w-auto bg-sky-700 hover:bg-sky-600 whitespace-nowrap"
     >
       {isCompleted ? "غير مكتمل" : "وضع علامة كمكتملة"}
       <Icon className="h-4 w-4 mr-2" />

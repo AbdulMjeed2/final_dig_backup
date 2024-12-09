@@ -22,7 +22,13 @@ export const ourFileRouter = {
   lessonVideo: f({ video: { maxFileCount: 1, maxFileSize: "512GB" } })
     .middleware(() => handleAuth())
     .onUploadComplete(() => {}),
-  taskAttachment: f({text: {maxFileSize: "512GB"},pdf: {maxFileSize: "512GB"},image: {maxFileSize: "512GB"},video: {maxFileSize: "512GB"},audio: {maxFileSize: "512GB"}})
+  taskAttachment: f({
+    text: { maxFileSize: "512GB" },
+    pdf: { maxFileSize: "512GB" },
+    image: { maxFileSize: "512GB" },
+    video: { maxFileSize: "512GB" },
+    audio: { maxFileSize: "512GB" },
+  })
     .middleware(() => handleAuth())
     .onUploadComplete(() => {}),
 } satisfies FileRouter;
